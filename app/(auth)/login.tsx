@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { View, Text, ScrollView, Alert, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -7,6 +8,7 @@ import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import { authApi } from "../../lib/api/auth";
 import { useAuthStore } from "../../store/authStore";
+import { AlertModal } from "../../components/ui/AlertModal";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -18,6 +20,8 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function LoginScreen() {
   const router = useRouter();
   const { setTokens, setUser } = useAuthStore();
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const {
     control,
@@ -38,7 +42,8 @@ export default function LoginScreen() {
       const user = await authApi.getMe();
       setUser(user);
     } catch {
-      Alert.alert("Error", "Invalid email or password");
+      setAlertMessage("Invalid email or password. Please try again.");
+      setAlertVisible(true);
     }
   };
 
@@ -101,6 +106,14 @@ export default function LoginScreen() {
           Sign up
         </Text>
       </View>
+      <AlertModal
+        visible={alertVisible}
+        title="Login Failed"
+        message={alertMessage}
+        type="error"
+        onClose={() => setAlertVisible(false)}
+        cancelText="Try Again"
+      />
     </ScrollView>
   );
 }

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { View, Text, ScrollView, Alert, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
@@ -7,6 +8,7 @@ import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import { authApi } from "../../lib/api/auth";
 import { useAuthStore } from "../../store/authStore";
+import { AlertModal } from "../../components/ui/AlertModal";
 
 const registerSchema = z
   .object({
@@ -26,6 +28,8 @@ type RegisterForm = z.infer<typeof registerSchema>;
 export default function RegisterScreen() {
   const router = useRouter();
   const { setTokens, setUser } = useAuthStore();
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
 
   const {
     control,
@@ -42,10 +46,8 @@ export default function RegisterScreen() {
       const user = await authApi.getMe();
       setUser(user);
     } catch {
-      Alert.alert(
-        "Error",
-        "Could not create account. Email may already be in use.",
-      );
+      setAlertMessage("Could not create account. Email may already be in use.");
+      setAlertVisible(true);
     }
   };
 
@@ -123,6 +125,14 @@ export default function RegisterScreen() {
           Log in
         </Text>
       </View>
+      <AlertModal
+        visible={alertVisible}
+        title="Registration Failed"
+        message={alertMessage}
+        type="error"
+        onClose={() => setAlertVisible(false)}
+        cancelText="Try Again"
+      />
     </ScrollView>
   );
 }
