@@ -8,14 +8,18 @@ import { Button } from "../../components/ui/Button";
 import { authApi } from "../../lib/api/auth";
 import { useAuthStore } from "../../store/authStore";
 
-const registerSchema = z.object({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
-  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    email: z.string().email("Invalid email"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 type RegisterForm = z.infer<typeof registerSchema>;
 
@@ -38,7 +42,10 @@ export default function RegisterScreen() {
       const user = await authApi.getMe();
       setUser(user);
     } catch {
-      Alert.alert("Error", "Could not create account. Email may already be in use.");
+      Alert.alert(
+        "Error",
+        "Could not create account. Email may already be in use.",
+      );
     }
   };
 
@@ -50,7 +57,9 @@ export default function RegisterScreen() {
     >
       <View style={styles.header}>
         <Text style={styles.title}>Get started</Text>
-        <Text style={styles.subtitle}>Create your account and start training</Text>
+        <Text style={styles.subtitle}>
+          Create your account and start training
+        </Text>
       </View>
 
       <Controller
@@ -76,7 +85,7 @@ export default function RegisterScreen() {
           <Input
             label="Password"
             placeholder="••••••••"
-            secureTextEntry
+            isPassword
             onChangeText={onChange}
             value={value}
             error={errors.password?.message}
@@ -91,7 +100,7 @@ export default function RegisterScreen() {
           <Input
             label="Confirm Password"
             placeholder="••••••••"
-            secureTextEntry
+            isPassword
             onChangeText={onChange}
             value={value}
             error={errors.confirmPassword?.message}

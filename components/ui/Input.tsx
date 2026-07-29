@@ -1,19 +1,40 @@
-import { View, Text, TextInput, TextInputProps, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, Text, TextInput, TextInputProps, StyleSheet, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
+  isPassword?: boolean;
 }
 
-export const Input = ({ label, error, ...props }: InputProps) => {
+export const Input = ({ label, error, isPassword = false, ...props }: InputProps) => {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <View style={styles.container}>
       {label && <Text style={styles.label}>{label}</Text>}
-      <TextInput
-        style={[styles.input, error && styles.inputError]}
-        placeholderTextColor="#888888"
-        {...props}
-      />
+      <View style={styles.inputWrapper}>
+        <TextInput
+          style={[styles.input, error && styles.inputError, isPassword && styles.inputWithIcon]}
+          placeholderTextColor="#888888"
+          secureTextEntry={isPassword && !showPassword}
+          {...props}
+        />
+        {isPassword && (
+          <TouchableOpacity
+            style={styles.eyeButton}
+            onPress={() => setShowPassword(!showPassword)}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name={showPassword ? "eye-outline" : "eye-off-outline"}
+              size={22}
+              color="#888888"
+            />
+          </TouchableOpacity>
+        )}
+      </View>
       {error && <Text style={styles.error}>{error}</Text>}
     </View>
   );
@@ -29,6 +50,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontWeight: "500",
   },
+  inputWrapper: {
+    position: "relative",
+  },
   input: {
     backgroundColor: "#1A1A1A",
     borderWidth: 1,
@@ -39,8 +63,18 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
   },
+  inputWithIcon: {
+    paddingRight: 48,
+  },
   inputError: {
     borderColor: "#EF4444",
+  },
+  eyeButton: {
+    position: "absolute",
+    right: 16,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
   },
   error: {
     color: "#EF4444",

@@ -20,16 +20,16 @@ export default function LoginScreen() {
   const { setTokens, setUser } = useAuthStore();
 
   const {
-  control,
-  handleSubmit,
-  formState: { errors, isSubmitting },
-} = useForm<LoginForm>({
-  resolver: zodResolver(loginSchema),
-  defaultValues: {
-    email: "",
-    password: "",
-  },
-});
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   const onSubmit = async (data: LoginForm) => {
     try {
@@ -78,7 +78,7 @@ export default function LoginScreen() {
           <Input
             label="Password"
             placeholder="••••••••"
-            secureTextEntry
+            isPassword
             onChangeText={onChange}
             value={value}
             error={errors.password?.message}
