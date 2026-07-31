@@ -32,6 +32,8 @@ export const workoutsApi = {
   },
 
   delete: async (id: string) => {
-    return apiRequest(`/workouts/${id}`, { method: "DELETE" });
+    return apiRequest(`/workouts/${id}`, {
+      method: "DELETE",
+    });
   },
 };

@@ -7,14 +7,12 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Modal,
-  Alert,
 } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { workoutsApi } from "../../lib/api/workouts";
-import { exercisesApi } from "../../lib/api/exercises";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
@@ -42,11 +40,6 @@ export default function WorkoutsScreen() {
     queryFn: () => workoutsApi.getAll(1, 20),
   });
 
-  const { data: exercisesData } = useQuery({
-    queryKey: ["exercises"],
-    queryFn: () => exercisesApi.getAll(1, 100),
-  });
-
   const createMutation = useMutation({
     mutationFn: (name: string) =>
       workoutsApi.create({
@@ -59,17 +52,30 @@ export default function WorkoutsScreen() {
       setWorkoutName("");
     },
     onError: () => {
-      Alert.alert("Error", "Could not create workout");
+      setAlertConfig({
+        title: "Error",
+        message: "Could not create workout.",
+        type: "error",
+      });
+      setAlertVisible(true);
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: workoutsApi.delete,
+    mutationFn: async (id: string) => {
+      const result = await workoutsApi.delete(id);
+      return result;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
     },
-    onError: () => {
-      Alert.alert("Error", "Could not delete workout");
+    onError: (error) => {
+      setAlertConfig({
+        title: "Error",
+        message: "Could not delete workout.",
+        type: "error",
+      });
+      setAlertVisible(true);
     },
   });
 
@@ -87,20 +93,6 @@ export default function WorkoutsScreen() {
       setAlertVisible(true);
       return;
     }
-
-    const exercises = exercisesData?.data ?? [];
-
-    if (exercises.length === 0) {
-      setAlertConfig({
-        title: "No Exercises Available",
-        message:
-          "You need exercises in the catalog before creating a workout. Ask an admin to add some first.",
-        type: "info",
-      });
-      setAlertVisible(true);
-      return;
-    }
-
     createMutation.mutate(workoutName.trim());
   };
 
@@ -164,7 +156,10 @@ export default function WorkoutsScreen() {
                   </Text>
                 </View>
                 <TouchableOpacity
-                  onPress={() => handleDelete(workout.id, workout.name)}
+                  onPress={(e) => {
+                    e.stopPropagation();
+                    handleDelete(workout.id, workout.name);
+                  }}
                   activeOpacity={0.7}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >

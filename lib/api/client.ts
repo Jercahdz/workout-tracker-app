@@ -36,8 +36,10 @@ export const apiRequest = async (
 ): Promise<any> => {
   const token = await getAccessToken();
 
+  const hasBody = options.body !== undefined;
+
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(hasBody ? { "Content-Type": "application/json" } : {}),
     ...(options.headers as Record<string, string>),
   };
 
@@ -62,6 +64,7 @@ export const apiRequest = async (
         const error = await retryResponse.json();
         throw new Error(error.message ?? "Request failed");
       }
+      if (retryResponse.status === 204) return null;
       return retryResponse.json();
     } catch {
       throw new Error("SESSION_EXPIRED");
