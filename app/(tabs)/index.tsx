@@ -1,5 +1,12 @@
 import { useEffect } from "react";
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity
+} from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,10 +15,12 @@ import { workoutsApi } from "../../lib/api/workouts";
 import { useStatsStore } from "../../store/statsStore";
 import { Card } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
+import { useRouter } from "expo-router";
 
 export default function HomeScreen() {
   const { setStats } = useStatsStore();
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const { data: statsData, isLoading: statsLoading } = useQuery({
     queryKey: ["stats"],
@@ -49,15 +58,38 @@ export default function HomeScreen() {
         <Text style={styles.subtitle}>Keep pushing your limits</Text>
       </View>
 
+      <TouchableOpacity
+        style={styles.aiButton}
+        onPress={() => router.push("/ai-routine")}
+        activeOpacity={0.7}
+      >
+        <View style={styles.aiButtonLeft}>
+          <View style={styles.aiButtonIcon}>
+            <Ionicons name="flash" size={20} color="#0F0F0F" />
+          </View>
+          <View>
+            <Text style={styles.aiButtonTitle}>Generate AI Routine</Text>
+            <Text style={styles.aiButtonSubtitle}>
+              Get a personalized workout plan
+            </Text>
+          </View>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color="#0F0F0F" />
+      </TouchableOpacity>
+
       <Card style={styles.streakCard}>
         <View style={styles.streakRow}>
           <View>
             <Text style={styles.cardLabel}>Current Streak</Text>
             <View style={styles.streakValueRow}>
               <Ionicons name="flame" size={36} color="#FF6B35" />
-              <Text style={styles.streakValue}>{statsData?.currentStreak ?? 0} days</Text>
+              <Text style={styles.streakValue}>
+                {statsData?.currentStreak ?? 0} days
+              </Text>
             </View>
-            <Text style={styles.streakSub}>Best: {statsData?.bestStreak ?? 0} days</Text>
+            <Text style={styles.streakSub}>
+              Best: {statsData?.bestStreak ?? 0} days
+            </Text>
           </View>
           <View style={styles.shieldsContainer}>
             <Text style={styles.cardLabel}>Shields</Text>
@@ -77,7 +109,9 @@ export default function HomeScreen() {
           </View>
           <View style={styles.sessionsContainer}>
             <Ionicons name="trophy-outline" size={20} color="#888888" />
-            <Text style={styles.sessions}>{statsData?.totalSessions ?? 0} sessions</Text>
+            <Text style={styles.sessions}>
+              {statsData?.totalSessions ?? 0} sessions
+            </Text>
           </View>
         </View>
         <View style={styles.xpBarContainer}>
@@ -85,7 +119,9 @@ export default function HomeScreen() {
         </View>
         <View style={styles.xpLabels}>
           <Text style={styles.xpText}>{statsData?.xpProgress ?? 0} XP</Text>
-          <Text style={styles.xpText}>{statsData?.xpRequired ?? 0} XP needed</Text>
+          <Text style={styles.xpText}>
+            {statsData?.xpRequired ?? 0} XP needed
+          </Text>
         </View>
       </Card>
 
@@ -97,7 +133,9 @@ export default function HomeScreen() {
         <Card>
           <View style={styles.emptyContainer}>
             <Ionicons name="barbell-outline" size={40} color="#2A2A2A" />
-            <Text style={styles.emptyText}>No workouts yet. Create your first one!</Text>
+            <Text style={styles.emptyText}>
+              No workouts yet. Create your first one!
+            </Text>
           </View>
         </Card>
       )}
@@ -190,6 +228,38 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 24,
     fontWeight: "bold",
+  },
+  aiButton: {
+    backgroundColor: "#00FF87",
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  aiButtonLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  aiButtonIcon: {
+    width: 36,
+    height: 36,
+    backgroundColor: "rgba(0,0,0,0.15)",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  aiButtonTitle: {
+    color: "#0F0F0F",
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+  aiButtonSubtitle: {
+    color: "rgba(0,0,0,0.6)",
+    fontSize: 12,
+    marginTop: 2,
   },
   levelCard: {
     marginBottom: 24,
