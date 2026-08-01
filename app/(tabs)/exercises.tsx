@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
 } from "react-native";
+import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -34,20 +35,31 @@ const MUSCLE_GROUP_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   FULL_BODY: "body-outline",
 };
 
-const FILTERS = ["ALL", "CHEST", "BACK", "SHOULDERS", "ARMS", "LEGS", "CORE", "FULL_BODY"];
+const FILTERS = [
+  "ALL",
+  "CHEST",
+  "BACK",
+  "SHOULDERS",
+  "ARMS",
+  "LEGS",
+  "CORE",
+  "FULL_BODY",
+];
 
 export default function ExercisesScreen() {
   const insets = useSafeAreaInsets();
   const [selectedFilter, setSelectedFilter] = useState("ALL");
+  const router = useRouter();
 
   const { data, isLoading } = useQuery({
     queryKey: ["exercises"],
     queryFn: () => exercisesApi.getAll(1, 100),
   });
 
-  const filtered = selectedFilter === "ALL"
-    ? data?.data ?? []
-    : (data?.data ?? []).filter((e: any) => e.muscleGroup === selectedFilter);
+  const filtered =
+    selectedFilter === "ALL"
+      ? (data?.data ?? [])
+      : (data?.data ?? []).filter((e: any) => e.muscleGroup === selectedFilter);
 
   if (isLoading) {
     return (
@@ -61,7 +73,9 @@ export default function ExercisesScreen() {
     <View style={styles.container}>
       <View style={[styles.headerContainer, { paddingTop: insets.top + 20 }]}>
         <Text style={styles.title}>Exercises</Text>
-        <Text style={styles.subtitle}>{data?.meta?.total ?? 0} exercises available</Text>
+        <Text style={styles.subtitle}>
+          {data?.meta?.total ?? 0} exercises available
+        </Text>
 
         <ScrollView
           horizontal
@@ -107,40 +121,61 @@ export default function ExercisesScreen() {
         )}
 
         {filtered.map((exercise: any) => (
-          <Card key={exercise.id} style={styles.exerciseCard}>
-            <View style={styles.exerciseRow}>
-              <View
-                style={[
-                  styles.exerciseIcon,
-                  { backgroundColor: `${MUSCLE_GROUP_COLORS[exercise.muscleGroup]}20` },
-                ]}
-              >
-                <Ionicons
-                  name={MUSCLE_GROUP_ICONS[exercise.muscleGroup] ?? "body-outline"}
-                  size={22}
-                  color={MUSCLE_GROUP_COLORS[exercise.muscleGroup] ?? "#888888"}
-                />
-              </View>
-              <View style={styles.exerciseInfo}>
-                <Text style={styles.exerciseName}>{exercise.name}</Text>
-                <View style={styles.exerciseMeta}>
-                  <Badge
-                    label={exercise.muscleGroup.replace("_", " ")}
-                    variant="muted"
+          <TouchableOpacity
+            key={exercise.id}
+            activeOpacity={0.7}
+            onPress={() =>
+              router.push({
+                pathname: "/exercise/[id]",
+                params: {
+                  id: exercise.id,
+                  name: exercise.name,
+                  muscleGroup: exercise.muscleGroup,
+                  equipment: exercise.equipment ?? "",
+                  description: exercise.description ?? "",
+                },
+              })
+            }
+          >
+            <Card style={styles.exerciseCard}>
+              <View style={styles.exerciseRow}>
+                <View
+                  style={[
+                    styles.exerciseIcon,
+                    {
+                      backgroundColor: `${MUSCLE_GROUP_COLORS[exercise.muscleGroup]}20`,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="barbell-outline"
+                    size={22}
+                    color={
+                      MUSCLE_GROUP_COLORS[exercise.muscleGroup] ?? "#888888"
+                    }
                   />
-                  {exercise.equipment && (
-                    <Text style={styles.equipment}>{exercise.equipment}</Text>
-                  )}
                 </View>
+                <View style={styles.exerciseInfo}>
+                  <Text style={styles.exerciseName}>{exercise.name}</Text>
+                  <View style={styles.exerciseMeta}>
+                    <Badge
+                      label={exercise.muscleGroup.replace("_", " ")}
+                      variant="muted"
+                    />
+                    {exercise.equipment && (
+                      <Text style={styles.equipment}>{exercise.equipment}</Text>
+                    )}
+                  </View>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#2A2A2A" />
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#2A2A2A" />
-            </View>
-            {exercise.description && (
-              <Text style={styles.description} numberOfLines={2}>
-                {exercise.description}
-              </Text>
-            )}
-          </Card>
+              {exercise.description && (
+                <Text style={styles.description} numberOfLines={2}>
+                  {exercise.description}
+                </Text>
+              )}
+            </Card>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>
