@@ -222,5 +222,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   routineTitle: { color: "#FFFFFF", fontSize: 18, fontWeight: "bold" },
-  buttonContainer: { marginTop: 8 },
+  buttonContainer: { marginTop: 8, marginBottom: 32 },
 });

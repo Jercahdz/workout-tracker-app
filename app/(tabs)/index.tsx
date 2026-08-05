@@ -5,7 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
@@ -129,16 +129,28 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Recent Workouts</Text>
       </View>
 
-      {workoutsData?.data?.length === 0 && (
-        <Card>
-          <View style={styles.emptyContainer}>
-            <Ionicons name="barbell-outline" size={40} color="#2A2A2A" />
-            <Text style={styles.emptyText}>
-              No workouts yet. Create your first one!
-            </Text>
-          </View>
-        </Card>
-      )}
+      {workoutsData?.data?.map((workout: any) => (
+        <TouchableOpacity
+          key={workout.id}
+          activeOpacity={0.7}
+          onPress={() => router.push(`/workout/${workout.id}`)}
+        >
+          <Card style={styles.workoutCard}>
+            <View style={styles.workoutRow}>
+              <View style={styles.workoutIcon}>
+                <Ionicons name="barbell-outline" size={20} color="#00FF87" />
+              </View>
+              <View style={styles.workoutInfo}>
+                <Text style={styles.workoutName}>{workout.name}</Text>
+                <Text style={styles.workoutExercises}>
+                  {workout.workoutExercises?.length ?? 0} exercises
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#888888" />
+            </View>
+          </Card>
+        </TouchableOpacity>
+      ))}
 
       {workoutsData?.data?.map((workout: any) => (
         <Card key={workout.id} style={styles.workoutCard}>

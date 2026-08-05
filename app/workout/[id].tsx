@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Modal,
+  TextInput,
 } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
@@ -53,6 +54,8 @@ export default function WorkoutDetailScreen() {
     type: "info" as "error" | "warning" | "success" | "info",
   });
 
+  const [exerciseSearch, setExerciseSearch] = useState("");
+
   const { data: workout, isLoading } = useQuery({
     queryKey: ["workout", id],
     queryFn: async () => {
@@ -71,6 +74,11 @@ export default function WorkoutDetailScreen() {
   const { data: exercisesData } = useQuery({
     queryKey: ["exercises"],
     queryFn: () => exercisesApi.getAll(1, 100),
+  });
+
+  const { data: sessionsData } = useQuery({
+    queryKey: ["sessions", "workout", id],
+    queryFn: () => sessionsApi.getByWorkout(id),
   });
 
   const updateMutation = useMutation({
@@ -291,48 +299,79 @@ export default function WorkoutDetailScreen() {
               </View>
 
               <Text style={styles.fieldLabel}>Select Exercise</Text>
-              <ScrollView style={styles.exerciseList} nestedScrollEnabled>
-                {exercisesData?.data?.map((exercise: any) => (
+              <View style={styles.searchContainer}>
+                <Ionicons name="search-outline" size={16} color="#888888" />
+                <TextInput
+                  style={styles.searchInput}
+                  placeholder="Search exercises..."
+                  placeholderTextColor="#888888"
+                  value={exerciseSearch}
+                  onChangeText={setExerciseSearch}
+                  autoCapitalize="none"
+                />
+                {exerciseSearch.length > 0 && (
                   <TouchableOpacity
-                    key={exercise.id}
-                    style={[
-                      styles.exerciseOption,
-                      selectedExercise?.id === exercise.id &&
-                        styles.exerciseOptionActive,
-                    ]}
-                    onPress={() => setSelectedExercise(exercise)}
+                    onPress={() => setExerciseSearch("")}
                     activeOpacity={0.7}
                   >
-                    <View
-                      style={[
-                        styles.exerciseOptionIcon,
-                        {
-                          backgroundColor: `${MUSCLE_GROUP_COLORS[exercise.muscleGroup]}20`,
-                        },
-                      ]}
-                    >
-                      <Ionicons
-                        name="barbell-outline"
-                        size={16}
-                        color={
-                          MUSCLE_GROUP_COLORS[exercise.muscleGroup] ?? "#888888"
-                        }
-                      />
-                    </View>
-                    <Text
-                      style={[
-                        styles.exerciseOptionText,
-                        selectedExercise?.id === exercise.id &&
-                          styles.exerciseOptionTextActive,
-                      ]}
-                    >
-                      {exercise.name}
-                    </Text>
-                    {selectedExercise?.id === exercise.id && (
-                      <Ionicons name="checkmark" size={20} color="#00FF87" />
-                    )}
+                    <Ionicons name="close-circle" size={16} color="#888888" />
                   </TouchableOpacity>
-                ))}
+                )}
+              </View>
+              <ScrollView style={styles.exerciseList} nestedScrollEnabled>
+                {(exercisesData?.data ?? [])
+                  .filter(
+                    (e: any) =>
+                      exerciseSearch.length === 0 ||
+                      e.name
+                        .toLowerCase()
+                        .includes(exerciseSearch.toLowerCase()) ||
+                      e.equipment
+                        ?.toLowerCase()
+                        .includes(exerciseSearch.toLowerCase()),
+                  )
+                  .map((exercise: any) => (
+                    <TouchableOpacity
+                      key={exercise.id}
+                      style={[
+                        styles.exerciseOption,
+                        selectedExercise?.id === exercise.id &&
+                          styles.exerciseOptionActive,
+                      ]}
+                      onPress={() => setSelectedExercise(exercise)}
+                      activeOpacity={0.7}
+                    >
+                      <View
+                        style={[
+                          styles.exerciseOptionIcon,
+                          {
+                            backgroundColor: `${MUSCLE_GROUP_COLORS[exercise.muscleGroup]}20`,
+                          },
+                        ]}
+                      >
+                        <Ionicons
+                          name="barbell-outline"
+                          size={16}
+                          color={
+                            MUSCLE_GROUP_COLORS[exercise.muscleGroup] ??
+                            "#888888"
+                          }
+                        />
+                      </View>
+                      <Text
+                        style={[
+                          styles.exerciseOptionText,
+                          selectedExercise?.id === exercise.id &&
+                            styles.exerciseOptionTextActive,
+                        ]}
+                      >
+                        {exercise.name}
+                      </Text>
+                      {selectedExercise?.id === exercise.id && (
+                        <Ionicons name="checkmark" size={20} color="#00FF87" />
+                      )}
+                    </TouchableOpacity>
+                  ))}
               </ScrollView>
 
               <View style={styles.formRow}>
@@ -398,7 +437,6 @@ export default function WorkoutDetailScreen() {
                 <Ionicons name="close" size={24} color="#888888" />
               </TouchableOpacity>
             </View>
-
             <Text style={styles.sessionSummary}>
               {workout?.workoutExercises?.length} exercises · {workout?.name}
             </Text>
@@ -421,6 +459,36 @@ export default function WorkoutDetailScreen() {
         </View>
       </Modal>
 
+      {!isLoading && sessionsData && sessionsData.length > 0 && (
+        <View style={styles.sessionsSection}>
+          <Text style={styles.sessionsSectionTitle}>Session History</Text>
+          {sessionsData.map((session: any) => (
+            <Card key={session.id} style={styles.sessionCard}>
+              <View style={styles.sessionRow}>
+                <View style={styles.sessionIcon}>
+                  <Ionicons name="checkmark-circle" size={20} color="#00FF87" />
+                </View>
+                <View style={styles.sessionInfo}>
+                  <Text style={styles.sessionDate}>
+                    {new Date(session.completedAt).toLocaleDateString("en-US", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </Text>
+                  {session.notes && (
+                    <Text style={styles.sessionNotes} numberOfLines={1}>
+                      {session.notes}
+                    </Text>
+                  )}
+                </View>
+              </View>
+            </Card>
+          ))}
+        </View>
+      )}
+
       <AlertModal
         visible={alertVisible}
         title={alertConfig.title}
@@ -433,7 +501,7 @@ export default function WorkoutDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0F0F0F" },
+  container: { flex: 1, backgroundColor: "#0F0F0F", paddingBottom: 60 },
   loading: {
     flex: 1,
     backgroundColor: "#0F0F0F",
@@ -497,13 +565,28 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   modalTitle: { color: "#FFFFFF", fontSize: 20, fontWeight: "bold" },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2A2A2A",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginBottom: 8,
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontSize: 14,
+  },
   fieldLabel: {
     color: "#888888",
     fontSize: 14,
     marginBottom: 8,
     fontWeight: "500",
   },
-  exerciseList: { maxHeight: 200, marginBottom: 16 },
+  exerciseList: { maxHeight: 400, marginBottom: 16 },
   exerciseOption: {
     flexDirection: "row",
     alignItems: "center",
@@ -536,4 +619,24 @@ const styles = StyleSheet.create({
   formRow: { flexDirection: "row", gap: 12 },
   formThird: { flex: 1 },
   sessionSummary: { color: "#888888", fontSize: 14, marginBottom: 16 },
+  sessionsSection: { gap: 8 },
+  sessionsSectionTitle: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 8,
+  },
+  sessionCard: { paddingVertical: 12 },
+  sessionRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+  sessionIcon: {
+    width: 36,
+    height: 36,
+    backgroundColor: "rgba(0,255,135,0.1)",
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sessionInfo: { flex: 1 },
+  sessionDate: { color: "#FFFFFF", fontSize: 14, fontWeight: "600" },
+  sessionNotes: { color: "#888888", fontSize: 13, marginTop: 2 },
 });

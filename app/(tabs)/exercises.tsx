@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
@@ -50,17 +51,24 @@ export default function ExercisesScreen() {
   const insets = useSafeAreaInsets();
   const [selectedFilter, setSelectedFilter] = useState("ALL");
   const router = useRouter();
+  const [search, setSearch] = useState("");
 
   const { data, isLoading } = useQuery({
     queryKey: ["exercises"],
     queryFn: () => exercisesApi.getAll(1, 100),
   });
 
-  const filtered =
+  const filtered = (
     selectedFilter === "ALL"
       ? (data?.data ?? [])
-      : (data?.data ?? []).filter((e: any) => e.muscleGroup === selectedFilter);
-
+      : (data?.data ?? []).filter((e: any) => e.muscleGroup === selectedFilter)
+  ).filter(
+    (e: any) =>
+      search.length === 0 ||
+      e.name.toLowerCase().includes(search.toLowerCase()) ||
+      e.equipment?.toLowerCase().includes(search.toLowerCase()),
+  );
+  
   if (isLoading) {
     return (
       <View style={styles.loading}>
@@ -103,6 +111,28 @@ export default function ExercisesScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        <View style={styles.searchContainer}>
+          <Ionicons
+            name="search-outline"
+            size={18}
+            color="#888888"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search exercises..."
+            placeholderTextColor="#888888"
+            value={search}
+            onChangeText={setSearch}
+            autoCapitalize="none"
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch("")} activeOpacity={0.7}>
+              <Ionicons name="close-circle" size={18} color="#888888" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -210,6 +240,24 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 16,
   },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1A1A1A",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 2,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: "#2A2A2A",
+    gap: 8,
+  },
+  searchIcon: {},
+  searchInput: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontSize: 15,
+  },
   filtersContainer: {
     gap: 8,
     paddingRight: 20,
@@ -236,6 +284,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingTop: 12,
   },
   emptyContainer: {
     alignItems: "center",

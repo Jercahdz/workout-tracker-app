@@ -226,7 +226,7 @@ export default function ExerciseDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0F0F0F" },
+  container: { flex: 1, backgroundColor: "#0F0F0F", paddingBottom:28 },
   header: {
     flexDirection: "row",
     alignItems: "center",

@@ -5,6 +5,10 @@ export const sessionsApi = {
     return apiRequest(`/sessions?page=${page}&limit=${limit}`);
   },
 
+  getByWorkout: async (workoutId: string) => {
+    return apiRequest(`/sessions/workout/${workoutId}`);
+  },
+  
   create: async (data: { workoutId: string; completedAt?: string; notes?: string }) => {
     return apiRequest("/sessions", {
       method: "POST",
