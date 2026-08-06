@@ -11,4 +11,8 @@ export const progressApi = {
       body: JSON.stringify(data),
     });
   },
+
+  getExerciseProgress: async (exerciseId: string) => {
+    return apiRequest(`/progress/exercise/${exerciseId}`);
+  },
 };
