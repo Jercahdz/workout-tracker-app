@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Modal,
+  TextInput,
 } from "react-native";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
@@ -30,6 +31,7 @@ export default function WorkoutsScreen() {
   });
   const [modalVisible, setModalVisible] = useState(false);
   const [workoutName, setWorkoutName] = useState("");
+  const [search, setSearch] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<{
     id: string;
     name: string;
@@ -96,6 +98,38 @@ export default function WorkoutsScreen() {
     createMutation.mutate(workoutName.trim());
   };
 
+  const groupWorkoutsByWeek = (workouts: any[]) => {
+    const groups: { label: string; data: any[] }[] = [];
+    const now = new Date();
+
+    workouts.forEach((workout) => {
+      const date = new Date(workout.createdAt);
+      const diffDays = Math.floor(
+        (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+      );
+
+      let label = "";
+      if (diffDays < 7) {
+        label = "This Week";
+      } else if (diffDays < 14) {
+        label = "Last Week";
+      } else if (diffDays < 30) {
+        label = "This Month";
+      } else {
+        label = "Older";
+      }
+
+      const existing = groups.find((g) => g.label === label);
+      if (existing) {
+        existing.data.push(workout);
+      } else {
+        groups.push({ label, data: [workout] });
+      }
+    });
+
+    return groups;
+  };
+
   if (isLoading) {
     return (
       <View style={styles.loading}>
@@ -123,6 +157,23 @@ export default function WorkoutsScreen() {
           </TouchableOpacity>
         </View>
 
+        <View style={styles.searchContainer}>
+          <Ionicons name="search-outline" size={18} color="#888888" />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search workouts..."
+            placeholderTextColor="#888888"
+            value={search}
+            onChangeText={setSearch}
+            autoCapitalize="none"
+          />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch("")} activeOpacity={0.7}>
+              <Ionicons name="close-circle" size={18} color="#888888" />
+            </TouchableOpacity>
+          )}
+        </View>
+
         {data?.data?.length === 0 && (
           <Card>
             <View style={styles.emptyContainer}>
@@ -135,40 +186,76 @@ export default function WorkoutsScreen() {
           </Card>
         )}
 
-        {data?.data?.map((workout: any) => (
-          <TouchableOpacity
-            key={workout.id}
-            activeOpacity={0.7}
-            onPress={() => router.push(`/workout/${workout.id}`)}
-          >
-            <Card style={styles.workoutCard}>
-              <View style={styles.workoutRow}>
-                <View style={styles.workoutIcon}>
-                  <Ionicons name="barbell-outline" size={22} color="#00FF87" />
-                </View>
-                <View style={styles.workoutInfo}>
-                  <Text style={styles.workoutName}>{workout.name}</Text>
-                  <Text style={styles.workoutMeta}>
-                    {workout.workoutExercises?.length ?? 0} exercises
-                    {workout.scheduledAt
-                      ? ` · ${new Date(workout.scheduledAt).toLocaleDateString()}`
-                      : ""}
-                  </Text>
-                </View>
+        {(() => {
+          const filtered = (data?.data ?? []).filter(
+            (w: any) =>
+              search.length === 0 ||
+              w.name.toLowerCase().includes(search.toLowerCase()),
+          );
+          const groups = groupWorkoutsByWeek(filtered);
+
+          return groups.map((group) => (
+            <View key={group.label} style={styles.groupContainer}>
+              <Text style={styles.groupLabel}>{group.label}</Text>
+              {group.data.map((workout: any) => (
                 <TouchableOpacity
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    handleDelete(workout.id, workout.name);
-                  }}
+                  key={workout.id}
                   activeOpacity={0.7}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  onPress={() => router.push(`/workout/${workout.id}`)}
                 >
-                  <Ionicons name="trash-outline" size={20} color="#888888" />
+                  <Card style={styles.workoutCard}>
+                    <View style={styles.workoutRow}>
+                      <View style={styles.workoutIcon}>
+                        <Ionicons
+                          name="barbell-outline"
+                          size={22}
+                          color="#00FF87"
+                        />
+                      </View>
+                      <View style={styles.workoutInfo}>
+                        <Text style={styles.workoutName}>{workout.name}</Text>
+                        <Text style={styles.workoutMeta}>
+                          {workout.workoutExercises?.length ?? 0} exercises
+                          {" · "}
+                          {workout.scheduledAt
+                            ? new Date(workout.scheduledAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                },
+                              )
+                            : new Date(workout.createdAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                },
+                              )}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handleDelete(workout.id, workout.name);
+                        }}
+                        activeOpacity={0.7}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <Ionicons
+                          name="trash-outline"
+                          size={20}
+                          color="#888888"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </Card>
                 </TouchableOpacity>
-              </View>
-            </Card>
-          </TouchableOpacity>
-        ))}
+              ))}
+            </View>
+          ));
+        })()}
       </ScrollView>
 
       <Modal
@@ -308,6 +395,34 @@ const styles = StyleSheet.create({
     color: "#888888",
     fontSize: 13,
     marginTop: 2,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1A1A1A",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#2A2A2A",
+    gap: 8,
+  },
+  searchInput: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontSize: 15,
+  },
+  groupContainer: {
+    marginBottom: 16,
+  },
+  groupLabel: {
+    color: "#888888",
+    fontSize: 13,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 8,
   },
   modalOverlay: {
     flex: 1,
