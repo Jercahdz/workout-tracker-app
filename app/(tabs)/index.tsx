@@ -16,6 +16,7 @@ import { useStatsStore } from "../../store/statsStore";
 import { Card } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { useRouter } from "expo-router";
+import { getWorkoutColor } from "../../lib/constants/muscleGroups";
 
 export default function HomeScreen() {
   const { setStats } = useStatsStore();
@@ -129,45 +130,41 @@ export default function HomeScreen() {
         <Text style={styles.sectionTitle}>Recent Workouts</Text>
       </View>
 
-      {workoutsData?.data?.map((workout: any) => (
-        <TouchableOpacity
-          key={workout.id}
-          activeOpacity={0.7}
-          onPress={() => router.push(`/workout/${workout.id}`)}
-        >
-          <Card style={styles.workoutCard}>
-            <View style={styles.workoutRow}>
-              <View style={styles.workoutIcon}>
-                <Ionicons name="barbell-outline" size={20} color="#00FF87" />
+      {workoutsData?.data?.map((workout: any) => {
+        const color = getWorkoutColor(workout);
+        return (
+          <TouchableOpacity
+            key={workout.id}
+            activeOpacity={0.7}
+            onPress={() => router.push(`/workout/${workout.id}`)}
+          >
+            <Card
+              style={[
+                styles.workoutCard,
+                { borderLeftWidth: 4, borderLeftColor: color },
+              ]}
+            >
+              <View style={styles.workoutRow}>
+                <View
+                  style={[
+                    styles.workoutIcon,
+                    { backgroundColor: `${color}20` },
+                  ]}
+                >
+                  <Ionicons name="barbell-outline" size={20} color={color} />
+                </View>
+                <View style={styles.workoutInfo}>
+                  <Text style={styles.workoutName}>{workout.name}</Text>
+                  <Text style={styles.workoutExercises}>
+                    {workout.workoutExercises?.length ?? 0} exercises
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={20} color="#888888" />
               </View>
-              <View style={styles.workoutInfo}>
-                <Text style={styles.workoutName}>{workout.name}</Text>
-                <Text style={styles.workoutExercises}>
-                  {workout.workoutExercises?.length ?? 0} exercises
-                </Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#888888" />
-            </View>
-          </Card>
-        </TouchableOpacity>
-      ))}
-
-      {workoutsData?.data?.map((workout: any) => (
-        <Card key={workout.id} style={styles.workoutCard}>
-          <View style={styles.workoutRow}>
-            <View style={styles.workoutIcon}>
-              <Ionicons name="barbell-outline" size={20} color="#00FF87" />
-            </View>
-            <View style={styles.workoutInfo}>
-              <Text style={styles.workoutName}>{workout.name}</Text>
-              <Text style={styles.workoutExercises}>
-                {workout.workoutExercises?.length ?? 0} exercises
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color="#888888" />
-          </View>
-        </Card>
-      ))}
+            </Card>
+          </TouchableOpacity>
+        );
+      })}
     </ScrollView>
   );
 }

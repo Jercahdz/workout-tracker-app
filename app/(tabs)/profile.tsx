@@ -20,6 +20,7 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { AlertModal } from "../../components/ui/AlertModal";
 import { useAuthStore } from "../../store/authStore";
+import { getMuscleGroupColor } from "../../lib/constants/muscleGroups";
 
 const GOAL_LABELS: Record<string, string> = {
   LOSE_WEIGHT: "Lose Weight",
@@ -306,7 +307,13 @@ export default function ProfileScreen() {
           <>
             <Text style={styles.achievementSubtitle}>Unlocked</Text>
             {unlockedAchievements.map((achievement: any) => (
-              <Card key={achievement.id} style={styles.achievementCard}>
+              <Card
+                key={achievement.id}
+                style={[
+                  styles.achievementCard,
+                  { borderLeftWidth: 4, borderLeftColor: "#FBBF24" },
+                ]}
+              >
                 <View style={styles.achievementRow}>
                   <View style={styles.achievementIcon}>
                     <Ionicons name="trophy" size={22} color="#FBBF24" />
@@ -335,7 +342,11 @@ export default function ProfileScreen() {
             {lockedAchievements.map((achievement: any) => (
               <Card
                 key={achievement.id}
-                style={[styles.achievementCard, styles.lockedCard]}
+                style={[
+                  styles.achievementCard,
+                  styles.lockedCard,
+                  { borderLeftWidth: 4, borderLeftColor: "#2A2A2A" },
+                ]}
               >
                 <View style={styles.achievementRow}>
                   <View style={[styles.achievementIcon, styles.lockedIcon]}>

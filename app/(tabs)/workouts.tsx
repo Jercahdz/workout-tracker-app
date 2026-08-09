@@ -18,6 +18,7 @@ import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { AlertModal } from "../../components/ui/AlertModal";
+import { MUSCLE_GROUP_COLORS, getMuscleGroupColor, getWorkoutColor } from "../../lib/constants/muscleGroups";
 
 export default function WorkoutsScreen() {
   const insets = useSafeAreaInsets();
@@ -197,62 +198,74 @@ export default function WorkoutsScreen() {
           return groups.map((group) => (
             <View key={group.label} style={styles.groupContainer}>
               <Text style={styles.groupLabel}>{group.label}</Text>
-              {group.data.map((workout: any) => (
-                <TouchableOpacity
-                  key={workout.id}
-                  activeOpacity={0.7}
-                  onPress={() => router.push(`/workout/${workout.id}`)}
-                >
-                  <Card style={styles.workoutCard}>
-                    <View style={styles.workoutRow}>
-                      <View style={styles.workoutIcon}>
-                        <Ionicons
-                          name="barbell-outline"
-                          size={22}
-                          color="#00FF87"
-                        />
-                      </View>
-                      <View style={styles.workoutInfo}>
-                        <Text style={styles.workoutName}>{workout.name}</Text>
-                        <Text style={styles.workoutMeta}>
-                          {workout.workoutExercises?.length ?? 0} exercises
-                          {" · "}
-                          {workout.scheduledAt
-                            ? new Date(workout.scheduledAt).toLocaleDateString(
-                                "en-US",
-                                {
+              {group.data.map((workout: any) => {
+                const color = getWorkoutColor(workout);
+                return (
+                  <TouchableOpacity
+                    key={workout.id}
+                    activeOpacity={0.7}
+                    onPress={() => router.push(`/workout/${workout.id}`)}
+                  >
+                    <Card
+                      style={[
+                        styles.workoutCard,
+                        { borderLeftWidth: 4, borderLeftColor: color },
+                      ]}
+                    >
+                      <View style={styles.workoutRow}>
+                        <View
+                          style={[
+                            styles.workoutIcon,
+                            { backgroundColor: `${color}20` },
+                          ]}
+                        >
+                          <Ionicons
+                            name="barbell-outline"
+                            size={22}
+                            color={color}
+                          />
+                        </View>
+                        <View style={styles.workoutInfo}>
+                          <Text style={styles.workoutName}>{workout.name}</Text>
+                          <Text style={styles.workoutMeta}>
+                            {workout.workoutExercises?.length ?? 0} exercises
+                            {" · "}
+                            {workout.scheduledAt
+                              ? new Date(
+                                  workout.scheduledAt,
+                                ).toLocaleDateString("en-US", {
                                   month: "short",
                                   day: "numeric",
-                                },
-                              )
-                            : new Date(workout.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                },
-                              )}
-                        </Text>
+                                })
+                              : new Date(workout.createdAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  },
+                                )}
+                          </Text>
+                        </View>
+                        <TouchableOpacity
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            handleDelete(workout.id, workout.name);
+                          }}
+                          activeOpacity={0.7}
+                          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={20}
+                            color="#888888"
+                          />
+                        </TouchableOpacity>
                       </View>
-                      <TouchableOpacity
-                        onPress={(e) => {
-                          e.stopPropagation();
-                          handleDelete(workout.id, workout.name);
-                        }}
-                        activeOpacity={0.7}
-                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                      >
-                        <Ionicons
-                          name="trash-outline"
-                          size={20}
-                          color="#888888"
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  </Card>
-                </TouchableOpacity>
-              ))}
+                    </Card>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           ));
         })()}

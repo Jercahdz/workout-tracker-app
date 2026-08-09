@@ -15,16 +15,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { exercisesApi } from "../../lib/api/exercises";
 import { Card } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
-
-const MUSCLE_GROUP_COLORS: Record<string, string> = {
-  CHEST: "#EF4444",
-  BACK: "#3B82F6",
-  SHOULDERS: "#8B5CF6",
-  ARMS: "#F59E0B",
-  LEGS: "#10B981",
-  CORE: "#F97316",
-  FULL_BODY: "#00FF87",
-};
+import {
+  MUSCLE_GROUP_COLORS,
+  getMuscleGroupColor,
+  getWorkoutColor,
+} from "../../lib/constants/muscleGroups";
 
 const MUSCLE_GROUP_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   CHEST: "body-outline",
@@ -68,7 +63,7 @@ export default function ExercisesScreen() {
       e.name.toLowerCase().includes(search.toLowerCase()) ||
       e.equipment?.toLowerCase().includes(search.toLowerCase()),
   );
-  
+
   if (isLoading) {
     return (
       <View style={styles.loading}>
@@ -167,7 +162,15 @@ export default function ExercisesScreen() {
               })
             }
           >
-            <Card style={styles.exerciseCard}>
+            <Card
+              style={[
+                styles.exerciseCard,
+                {
+                  borderLeftWidth: 4,
+                  borderLeftColor: getMuscleGroupColor(exercise.muscleGroup),
+                },
+              ]}
+            >
               <View style={styles.exerciseRow}>
                 <View
                   style={[

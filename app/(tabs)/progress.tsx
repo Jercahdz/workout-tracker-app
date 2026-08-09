@@ -19,16 +19,11 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { AlertModal } from "../../components/ui/AlertModal";
 import { LineChart } from "../../components/ui/LineChart";
-
-const MUSCLE_GROUP_COLORS: Record<string, string> = {
-    CHEST: "#EF4444",
-    BACK: "#3B82F6",
-    SHOULDERS: "#8B5CF6",
-    ARMS: "#F59E0B",
-    LEGS: "#10B981",
-    CORE: "#F97316",
-    FULL_BODY: "#00FF87",
-  };
+import {
+  MUSCLE_GROUP_COLORS,
+  getMuscleGroupColor,
+  getWorkoutColor,
+} from "../../lib/constants/muscleGroups";
 
 export default function ProgressScreen() {
   const insets = useSafeAreaInsets();
@@ -258,8 +253,19 @@ export default function ProgressScreen() {
             {data?.data?.map((entry: any) => (
               <Card key={entry.id} style={styles.entryCard}>
                 <View style={styles.entryRow}>
-                  <View style={styles.entryIcon}>
-                    <Ionicons name="scale-outline" size={20} color="#00FF87" />
+                  <View
+                    style={[
+                      styles.entryIcon,
+                      {
+                        backgroundColor: `${getMuscleGroupColor(selectedExercise?.muscleGroup)}20`,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name="barbell-outline"
+                      size={20}
+                      color={getMuscleGroupColor(selectedExercise?.muscleGroup)}
+                    />
                   </View>
                   <View style={styles.entryInfo}>
                     <Text style={styles.entryWeight}>
@@ -295,7 +301,7 @@ export default function ProgressScreen() {
               <Ionicons
                 name="barbell-outline"
                 size={20}
-                color={selectedExercise ? "#00FF87" : "#888888"}
+                color={getMuscleGroupColor(selectedExercise?.muscleGroup)}
               />
               <Text
                 style={[
@@ -365,7 +371,7 @@ export default function ProgressScreen() {
                             ? "lb"
                             : "kg"
                         }
-                        color="#F59E0B"
+                        color={getMuscleGroupColor(selectedExercise?.muscleGroup)}
                       />
                     </Card>
                   )}
@@ -374,18 +380,33 @@ export default function ProgressScreen() {
                   {exerciseProgressData
                     ?.filter((e: any) => e.weight)
                     .map((entry: any, index: number) => (
-                      <Card key={index} style={styles.entryCard}>
+                      <Card
+                        key={index}
+                        style={[
+                          styles.entryCard,
+                          {
+                            borderLeftWidth: 4,
+                            borderLeftColor: getMuscleGroupColor(
+                              selectedExercise?.muscleGroup,
+                            ),
+                          },
+                        ]}
+                      >
                         <View style={styles.entryRow}>
                           <View
                             style={[
                               styles.entryIcon,
-                              { backgroundColor: "rgba(245,158,11,0.1)" },
+                              {
+                                backgroundColor: `${getMuscleGroupColor(selectedExercise?.muscleGroup)}20`,
+                              },
                             ]}
                           >
                             <Ionicons
                               name="barbell-outline"
                               size={20}
-                              color="#F59E0B"
+                              color={getMuscleGroupColor(
+                                selectedExercise?.muscleGroup,
+                              )}
                             />
                           </View>
                           <View style={styles.entryInfo}>

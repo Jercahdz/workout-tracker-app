@@ -13,16 +13,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Card } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
-
-const MUSCLE_GROUP_COLORS: Record<string, string> = {
-  CHEST: "#EF4444",
-  BACK: "#3B82F6",
-  SHOULDERS: "#8B5CF6",
-  ARMS: "#F59E0B",
-  LEGS: "#10B981",
-  CORE: "#F97316",
-  FULL_BODY: "#00FF87",
-};
+import {
+  MUSCLE_GROUP_COLORS,
+  getMuscleGroupColor,
+  getWorkoutColor,
+} from "../../lib/constants/muscleGroups";
 
 const EXERCISEDB_NAME_MAP: Record<string, string> = {
   "Bench Press": "barbell bench press",
@@ -113,7 +108,16 @@ export default function ExerciseDetailScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Card style={[styles.heroCard, { borderColor: `${color}40` }]}>
+        <Card
+          style={[
+            styles.heroCard,
+            {
+              borderColor: `${color}40`,
+              borderLeftWidth: 4,
+              borderLeftColor: color,
+            },
+          ]}
+        >
           {exerciseDbId ? (
             <Image
               source={{
@@ -226,7 +230,7 @@ export default function ExerciseDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0F0F0F", paddingBottom:28 },
+  container: { flex: 1, backgroundColor: "#0F0F0F", paddingBottom: 28 },
   header: {
     flexDirection: "row",
     alignItems: "center",

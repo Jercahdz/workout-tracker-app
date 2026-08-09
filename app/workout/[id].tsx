@@ -21,16 +21,11 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { Badge } from "../../components/ui/Badge";
 import { AlertModal } from "../../components/ui/AlertModal";
-
-const MUSCLE_GROUP_COLORS: Record<string, string> = {
-  CHEST: "#EF4444",
-  BACK: "#3B82F6",
-  SHOULDERS: "#8B5CF6",
-  ARMS: "#F59E0B",
-  LEGS: "#10B981",
-  CORE: "#F97316",
-  FULL_BODY: "#00FF87",
-};
+import {
+  MUSCLE_GROUP_COLORS,
+  getWorkoutColor,
+  getMuscleGroupColor,
+} from "../../lib/constants/muscleGroups";
 
 export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -42,6 +37,8 @@ export default function WorkoutDetailScreen() {
   const [sessionModal, setSessionModal] = useState(false);
   const [sessionNotes, setSessionNotes] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<any>(null);
+  const [editingExercise, setEditingExercise] = useState<any>(null);
+  const [editForm, setEditForm] = useState({ sets: "", reps: "", weight: "" });
   const [exerciseForm, setExerciseForm] = useState({
     sets: "3",
     reps: "10",
@@ -55,6 +52,10 @@ export default function WorkoutDetailScreen() {
   });
 
   const [exerciseSearch, setExerciseSearch] = useState("");
+
+  const [deleteExerciseTarget, setDeleteExerciseTarget] = useState<
+    string | null
+  >(null);
 
   const { data: workout, isLoading } = useQuery({
     queryKey: ["workout", id],
@@ -173,6 +174,47 @@ export default function WorkoutDetailScreen() {
     ]);
   };
 
+  const handleEditExercise = (we: any) => {
+    setEditingExercise(we);
+    setEditForm({
+      sets: String(we.sets),
+      reps: String(we.reps),
+      weight: we.weight ? String(we.weight) : "",
+    });
+  };
+
+  const handleSaveEdit = () => {
+    const sets = parseInt(editForm.sets);
+    const reps = parseInt(editForm.reps);
+    const weight = editForm.weight ? parseFloat(editForm.weight) : undefined;
+
+    if (!sets || !reps) {
+      setAlertConfig({
+        title: "Invalid Values",
+        message: "Please enter valid sets and reps.",
+        type: "warning",
+      });
+      setAlertVisible(true);
+      return;
+    }
+
+    const updated =
+      workout?.workoutExercises?.map((we: any) => {
+        if (we.id === editingExercise.id) {
+          return { exerciseId: we.exerciseId, sets, reps, weight };
+        }
+        return {
+          exerciseId: we.exerciseId,
+          sets: we.sets,
+          reps: we.reps,
+          weight: we.weight ?? undefined,
+        };
+      }) ?? [];
+
+    updateMutation.mutate(updated);
+    setEditingExercise(null);
+  };
+
   const handleRemoveExercise = (exerciseId: string) => {
     const updated =
       workout?.workoutExercises
@@ -227,48 +269,84 @@ export default function WorkoutDetailScreen() {
           )}
 
         {!isLoading &&
-          workout?.workoutExercises?.map((we: any) => (
-            <Card key={we.id} style={styles.exerciseCard}>
-              <View style={styles.exerciseRow}>
-                <View
-                  style={[
-                    styles.exerciseIcon,
-                    {
-                      backgroundColor: `${MUSCLE_GROUP_COLORS[we.exercise?.muscleGroup] ?? "#888888"}20`,
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name="barbell-outline"
-                    size={20}
-                    color={
-                      MUSCLE_GROUP_COLORS[we.exercise?.muscleGroup] ?? "#888888"
-                    }
-                  />
-                </View>
-                <View style={styles.exerciseInfo}>
-                  <Text style={styles.exerciseName}>{we.exercise?.name}</Text>
-                  <View style={styles.exerciseMeta}>
-                    <Badge label={`${we.sets} sets`} variant="muted" />
-                    <Badge label={`${we.reps} reps`} variant="muted" />
-                    {we.weight && (
-                      <Badge
-                        label={`${we.weight} ${we.unitSystem === "IMPERIAL" ? "lb" : "kg"}`}
-                        variant="primary"
+          workout?.workoutExercises?.map((we: any) => {
+            const color = getMuscleGroupColor(we.exercise?.muscleGroup);
+            return (
+              <Card
+                key={we.id}
+                style={[
+                  styles.exerciseCard,
+                  { borderLeftWidth: 4, borderLeftColor: color },
+                ]}
+              >
+                <View style={styles.exerciseRow}>
+                  <View
+                    style={[
+                      styles.exerciseIcon,
+                      { backgroundColor: `${color}20` },
+                    ]}
+                  >
+                    <Ionicons name="barbell-outline" size={20} color={color} />
+                  </View>
+                  <View style={styles.exerciseInfo}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        router.push({
+                          pathname: "/exercise/[id]",
+                          params: {
+                            id: we.exerciseId,
+                            name: we.exercise?.name,
+                            muscleGroup: we.exercise?.muscleGroup,
+                            equipment: we.exercise?.equipment ?? "",
+                            description: we.exercise?.description ?? "",
+                          },
+                        })
+                      }
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[styles.exerciseName]}>
+                        {we.exercise?.name}
+                      </Text>
+                    </TouchableOpacity>
+                    <View style={styles.exerciseMeta}>
+                      <Badge label={`${we.sets} sets`} variant="muted" />
+                      <Badge label={`${we.reps} reps`} variant="muted" />
+                      {we.weight && (
+                        <Badge
+                          label={`${we.weight} ${we.unitSystem === "IMPERIAL" ? "lb" : "kg"}`}
+                          variant="primary"
+                        />
+                      )}
+                    </View>
+                  </View>
+                  <View style={styles.exerciseActions}>
+                    <TouchableOpacity
+                      onPress={() => handleEditExercise(we)}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Ionicons
+                        name="pencil-outline"
+                        size={20}
+                        color="#888888"
                       />
-                    )}
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => setDeleteExerciseTarget(we.exerciseId)}
+                      activeOpacity={0.7}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Ionicons
+                        name="trash-outline"
+                        size={20}
+                        color="#888888"
+                      />
+                    </TouchableOpacity>
                   </View>
                 </View>
-                <TouchableOpacity
-                  onPress={() => handleRemoveExercise(we.exerciseId)}
-                  activeOpacity={0.7}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                >
-                  <Ionicons name="trash-outline" size={20} color="#888888" />
-                </TouchableOpacity>
-              </View>
-            </Card>
-          ))}
+              </Card>
+            );
+          })}
 
         {!isLoading && workout?.workoutExercises?.length > 0 && (
           <Button
@@ -421,6 +499,65 @@ export default function WorkoutDetailScreen() {
       </Modal>
 
       <Modal
+        visible={!!editingExercise}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditingExercise(null)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                {editingExercise?.exercise?.name}
+              </Text>
+              <TouchableOpacity
+                onPress={() => setEditingExercise(null)}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="close" size={24} color="#888888" />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.formRow}>
+              <View style={styles.formThird}>
+                <Input
+                  label="Sets"
+                  placeholder="3"
+                  keyboardType="numeric"
+                  value={editForm.sets}
+                  onChangeText={(v) => setEditForm({ ...editForm, sets: v })}
+                />
+              </View>
+              <View style={styles.formThird}>
+                <Input
+                  label="Reps"
+                  placeholder="10"
+                  keyboardType="numeric"
+                  value={editForm.reps}
+                  onChangeText={(v) => setEditForm({ ...editForm, reps: v })}
+                />
+              </View>
+              <View style={styles.formThird}>
+                <Input
+                  label="Weight"
+                  placeholder="0"
+                  keyboardType="decimal-pad"
+                  value={editForm.weight}
+                  onChangeText={(v) => setEditForm({ ...editForm, weight: v })}
+                />
+              </View>
+            </View>
+
+            <Button
+              title="Save Changes"
+              onPress={handleSaveEdit}
+              loading={updateMutation.isPending}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
         visible={sessionModal}
         transparent
         animationType="slide"
@@ -490,6 +627,22 @@ export default function WorkoutDetailScreen() {
       )}
 
       <AlertModal
+        visible={!!deleteExerciseTarget}
+        title="Remove Exercise"
+        message="Are you sure you want to remove this exercise from the workout?"
+        type="error"
+        onClose={() => setDeleteExerciseTarget(null)}
+        confirmText="Remove"
+        onConfirm={() => {
+          if (deleteExerciseTarget) {
+            handleRemoveExercise(deleteExerciseTarget);
+            setDeleteExerciseTarget(null);
+          }
+        }}
+        cancelText="Cancel"
+      />
+
+      <AlertModal
         visible={alertVisible}
         title={alertConfig.title}
         message={alertConfig.message}
@@ -546,6 +699,11 @@ const styles = StyleSheet.create({
   exerciseInfo: { flex: 1, gap: 6 },
   exerciseName: { color: "#FFFFFF", fontSize: 15, fontWeight: "600" },
   exerciseMeta: { flexDirection: "row", gap: 6, flexWrap: "wrap" },
+  exerciseActions: {
+    flexDirection: "column",
+    gap: 12,
+    alignItems: "center",
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.7)",
