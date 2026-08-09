@@ -1,6 +1,6 @@
 import * as SecureStore from "expo-secure-store";
 
-export const API_URL = "https://workouttrackerapi-production.up.railway.app";
+export const API_URL = "https://workout-tracker-api-gkno.onrender.com";
 
 const getAccessToken = async () => {
   return await SecureStore.getItemAsync("accessToken");
