@@ -7,7 +7,9 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Modal,
+  Image,
 } from "react-native";
+import i18n from "../../lib/i18n";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,22 +22,30 @@ import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { AlertModal } from "../../components/ui/AlertModal";
 import { useAuthStore } from "../../store/authStore";
-import { getMuscleGroupColor } from "../../lib/constants/muscleGroups";
 
-const GOAL_LABELS: Record<string, string> = {
-  LOSE_WEIGHT: "Lose Weight",
-  GAIN_MUSCLE: "Gain Muscle",
-  MAINTAIN: "Maintain",
-  IMPROVE_ENDURANCE: "Improve Endurance",
+const PROFILE_ICONS = {
+  PROFILE: require("../../assets/icons/app_profile.png"),
+  STREAK: require("../../assets/icons/app_streak.png"),
+  XP: require("../../assets/icons/app_xp.png"),
+  ACHIEVEMENT: require("../../assets/icons/app_achievement.png"),
+  SHIELD: require("../../assets/icons/app_shield.png"),
 };
 
-const LEVEL_LABELS: Record<string, string> = {
-  BEGINNER: "Beginner",
-  INTERMEDIATE: "Intermediate",
-  ADVANCED: "Advanced",
+const ACHIEVEMENT_ICONS: Record<string, any> = {
+  "Consistency King": require("../../assets/icons/app_consistency_king.png"),
+  "AI Powered": require("../../assets/icons/app_ai_powered.png"),
+  "First Rep": require("../../assets/icons/app_first_rep.png"),
+  "Century": require("../../assets/icons/app_century.png"),
+  "Iron Will": require("../../assets/icons/app_iron_will.png"),
+  "On Fire": require("../../assets/icons/app_on_fire.png"),
+  "Unstoppable": require("../../assets/icons/app_unstoppable.png"),
 };
 
 const TRAINING_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+
+const GOALS = ["LOSE_WEIGHT", "GAIN_MUSCLE", "MAINTAIN", "IMPROVE_ENDURANCE"];
+
+const LEVELS = ["BEGINNER", "INTERMEDIATE", "ADVANCED"];
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
@@ -82,8 +92,8 @@ export default function ProfileScreen() {
       queryClient.invalidateQueries({ queryKey: ["profile"] });
       setModalVisible(false);
       setAlertConfig({
-        title: "Saved",
-        message: "Profile updated successfully.",
+        title: i18n.t("profile.saved"),
+        message: i18n.t("profile.savedMsg"),
         type: "success",
       });
       setAlertVisible(true);
@@ -91,7 +101,7 @@ export default function ProfileScreen() {
     onError: () => {
       setAlertConfig({
         title: "Error",
-        message: "Could not save profile.",
+        message: i18n.t("profile.errorSave"),
         type: "error",
       });
       setAlertVisible(true);
@@ -130,8 +140,8 @@ export default function ProfileScreen() {
 
     if (!age || !weight || !height) {
       setAlertConfig({
-        title: "Missing Fields",
-        message: "Please fill in all required fields.",
+        title: i18n.t("profile.missingFields"),
+        message: i18n.t("profile.missingFieldsMsg"),
         type: "warning",
       });
       setAlertVisible(true);
@@ -140,8 +150,8 @@ export default function ProfileScreen() {
 
     if (!form.goal) {
       setAlertConfig({
-        title: "Missing Goal",
-        message: "Please select a fitness goal.",
+        title: i18n.t("profile.missingGoal"),
+        message: i18n.t("profile.missingGoalMsg"),
         type: "warning",
       });
       setAlertVisible(true);
@@ -150,8 +160,8 @@ export default function ProfileScreen() {
 
     if (!form.level) {
       setAlertConfig({
-        title: "Missing Level",
-        message: "Please select your fitness level.",
+        title: i18n.t("profile.missingLevel"),
+        message: i18n.t("profile.missingLevelMsg"),
         type: "warning",
       });
       setAlertVisible(true);
@@ -194,7 +204,11 @@ export default function ProfileScreen() {
       >
         <View style={styles.header}>
           <View style={styles.avatar}>
-            <Ionicons name="person" size={32} color="#00FF87" />
+            <Image
+              source={PROFILE_ICONS.PROFILE}
+              style={{ width: 32, height: 32 }}
+              resizeMode="contain"
+            />
           </View>
           <View style={styles.userInfo}>
             <Text style={styles.email}>{user?.email}</Text>
@@ -205,34 +219,54 @@ export default function ProfileScreen() {
             onPress={() => setLogoutAlertVisible(true)}
             activeOpacity={0.7}
           >
-            <Ionicons name="log-out-outline" size={24} color="#888888" />
+            <Ionicons name="log-out-outline" size={28} color="#888888" />
           </TouchableOpacity>
         </View>
 
         <View style={styles.statsRow}>
           <Card style={styles.statCard}>
-            <Ionicons name="flame" size={20} color="#FF6B35" />
+            <Image
+              source={PROFILE_ICONS.STREAK}
+              style={{ width: 32, height: 32, }}
+              resizeMode="contain"
+            />
             <Text style={styles.statValue}>
               {statsData?.currentStreak ?? 0}
             </Text>
-            <Text style={styles.statLabel}>Streak</Text>
+            <Text style={styles.statLabel}>
+              {i18n.t("profile.stats.streak")}
+            </Text>
           </Card>
+
           <Card style={styles.statCard}>
-            <Ionicons name="trophy-outline" size={20} color="#FBBF24" />
+            <Image
+              source={PROFILE_ICONS.SHIELD}
+              style={{ width: 32, height: 32}}
+              resizeMode="contain"
+            />
             <Text style={styles.statValue}>
               {statsData?.totalSessions ?? 0}
             </Text>
-            <Text style={styles.statLabel}>Sessions</Text>
+            <Text style={styles.statLabel}>
+              {i18n.t("profile.stats.sessions")}
+            </Text>
           </Card>
+
           <Card style={styles.statCard}>
-            <Ionicons name="star-outline" size={20} color="#00FF87" />
+            <Image
+              source={PROFILE_ICONS.XP}
+              style={{ width: 32, height: 32 }}
+              resizeMode="contain"
+            />
             <Text style={styles.statValue}>{statsData?.totalXp ?? 0}</Text>
-            <Text style={styles.statLabel}>XP</Text>
+            <Text style={styles.statLabel}>{i18n.t("profile.stats.xp")}</Text>
           </Card>
         </View>
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Fitness Profile</Text>
+          <Text style={styles.sectionTitle}>
+            {i18n.t("profile.fitnessProfile")}
+          </Text>
           <TouchableOpacity onPress={openModal} activeOpacity={0.7}>
             <Ionicons name="pencil-outline" size={20} color="#00FF87" />
           </TouchableOpacity>
@@ -242,25 +276,31 @@ export default function ProfileScreen() {
           <Card style={styles.profileCard}>
             <View style={styles.profileGrid}>
               <View style={styles.profileItem}>
-                <Text style={styles.profileLabel}>Age</Text>
-                <Text style={styles.profileValue}>{profileData.age} yrs</Text>
+                <Text style={styles.profileLabel}>{i18n.t("profile.age")}</Text>
+                <Text style={styles.profileValue}>{profileData.age}</Text>
               </View>
               <View style={styles.profileItem}>
-                <Text style={styles.profileLabel}>Weight</Text>
+                <Text style={styles.profileLabel}>
+                  {i18n.t("profile.weight")}
+                </Text>
                 <Text style={styles.profileValue}>
                   {profileData.weight}{" "}
                   {profileData.unitSystem === "IMPERIAL" ? "lb" : "kg"}
                 </Text>
               </View>
               <View style={styles.profileItem}>
-                <Text style={styles.profileLabel}>Height</Text>
+                <Text style={styles.profileLabel}>
+                  {i18n.t("profile.height")}
+                </Text>
                 <Text style={styles.profileValue}>
                   {profileData.height}{" "}
                   {profileData.unitSystem === "IMPERIAL" ? "in" : "cm"}
                 </Text>
               </View>
               <View style={styles.profileItem}>
-                <Text style={styles.profileLabel}>Units</Text>
+                <Text style={styles.profileLabel}>
+                  {i18n.t("profile.units")}
+                </Text>
                 <Text style={styles.profileValue}>
                   {profileData.unitSystem}
                 </Text>
@@ -269,11 +309,11 @@ export default function ProfileScreen() {
             <View style={styles.divider} />
             <View style={styles.badgeRow}>
               <Badge
-                label={GOAL_LABELS[profileData.goal] ?? profileData.goal}
+                label={i18n.t(`profile.goals.${profileData.goal}`)}
                 variant="primary"
               />
               <Badge
-                label={LEVEL_LABELS[profileData.level] ?? profileData.level}
+                label={i18n.t(`profile.levels.${profileData.level}`)}
                 variant="muted"
               />
             </View>
@@ -281,7 +321,9 @@ export default function ProfileScreen() {
               <View style={styles.trainingDaysRow}>
                 {JSON.parse(profileData.trainingDays).map((day: string) => (
                   <View key={day} style={styles.dayChip}>
-                    <Text style={styles.dayChipText}>{day}</Text>
+                    <Text style={styles.dayChipText}>
+                      {i18n.t(`profile.days.${day}`)}
+                    </Text>
                   </View>
                 ))}
               </View>
@@ -291,9 +333,12 @@ export default function ProfileScreen() {
           <Card>
             <View style={styles.emptyContainer}>
               <Ionicons name="person-outline" size={40} color="#2A2A2A" />
-              <Text style={styles.emptyText}>No profile yet</Text>
+              <Text style={styles.emptyText}>
+                {i18n.t("profile.noProfile")}
+              </Text>
+
               <Button
-                title="Create Profile"
+                title={i18n.t("profile.createProfile")}
                 onPress={openModal}
                 variant="outline"
               />
@@ -301,11 +346,15 @@ export default function ProfileScreen() {
           </Card>
         )}
 
-        <Text style={styles.sectionTitle}>Achievements</Text>
+        <Text style={styles.sectionTitle}>
+          {i18n.t("profile.achievements")}
+        </Text>
 
         {unlockedAchievements.length > 0 && (
           <>
-            <Text style={styles.achievementSubtitle}>Unlocked</Text>
+            <Text style={styles.achievementSubtitle}>
+              {i18n.t("profile.unlocked")}
+            </Text>
             {unlockedAchievements.map((achievement: any) => (
               <Card
                 key={achievement.id}
@@ -316,7 +365,18 @@ export default function ProfileScreen() {
               >
                 <View style={styles.achievementRow}>
                   <View style={styles.achievementIcon}>
-                    <Ionicons name="trophy" size={22} color="#FBBF24" />
+                    <Image
+                      source={
+                        ACHIEVEMENT_ICONS[achievement.name] ??
+                        PROFILE_ICONS.ACHIEVEMENT
+                      }
+                      style={{
+                        width: 28,
+                        height: 28,
+                        tintColor: "#FBBF24",
+                      }}
+                      resizeMode="contain"
+                    />
                   </View>
                   <View style={styles.achievementInfo}>
                     <Text style={styles.achievementName}>
@@ -338,7 +398,9 @@ export default function ProfileScreen() {
 
         {lockedAchievements.length > 0 && (
           <>
-            <Text style={styles.achievementSubtitle}>Locked</Text>
+            <Text style={styles.achievementSubtitle}>
+              {i18n.t("profile.locked")}
+            </Text>
             {lockedAchievements.map((achievement: any) => (
               <Card
                 key={achievement.id}
@@ -350,7 +412,19 @@ export default function ProfileScreen() {
               >
                 <View style={styles.achievementRow}>
                   <View style={[styles.achievementIcon, styles.lockedIcon]}>
-                    <Ionicons name="lock-closed" size={22} color="#888888" />
+                    <Image
+                      source={
+                        ACHIEVEMENT_ICONS[achievement.name] ??
+                        PROFILE_ICONS.ACHIEVEMENT
+                      }
+                      style={{
+                        width: 28,
+                        height: 28,
+                        tintColor: "#888888",
+                        opacity: 0.5,
+                      }}
+                      resizeMode="contain"
+                    />
                   </View>
                   <View style={styles.achievementInfo}>
                     <Text style={[styles.achievementName, styles.lockedText]}>
@@ -378,7 +452,9 @@ export default function ProfileScreen() {
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>
-                  {profileData ? "Edit Profile" : "Create Profile"}
+                  {profileData
+                    ? i18n.t("profile.editProfile")
+                    : i18n.t("profile.createProfile")}
                 </Text>
                 <TouchableOpacity
                   onPress={() => setModalVisible(false)}
@@ -391,7 +467,7 @@ export default function ProfileScreen() {
               <View style={styles.formRow}>
                 <View style={styles.formHalf}>
                   <Input
-                    label="Age"
+                    label={i18n.t("profile.age")}
                     placeholder="25"
                     keyboardType="numeric"
                     value={form.age}
@@ -400,7 +476,9 @@ export default function ProfileScreen() {
                 </View>
                 <View style={styles.formHalf}>
                   <Input
-                    label={`Weight (${form.unitSystem === "IMPERIAL" ? "lb" : "kg"})`}
+                    label={`${i18n.t("profile.weight")} (${
+                      form.unitSystem === "IMPERIAL" ? "lb" : "kg"
+                    })`}
                     placeholder="75"
                     keyboardType="decimal-pad"
                     value={form.weight}
@@ -412,7 +490,9 @@ export default function ProfileScreen() {
               <View style={styles.formRow}>
                 <View style={styles.formHalf}>
                   <Input
-                    label={`Height (${form.unitSystem === "IMPERIAL" ? "in" : "cm"})`}
+                    label={`${i18n.t("profile.height")} (${
+                      form.unitSystem === "IMPERIAL" ? "in" : "cm"
+                    })`}
                     placeholder="175"
                     keyboardType="decimal-pad"
                     value={form.height}
@@ -420,7 +500,9 @@ export default function ProfileScreen() {
                   />
                 </View>
                 <View style={styles.formHalf}>
-                  <Text style={styles.fieldLabel}>Units</Text>
+                  <Text style={styles.fieldLabel}>
+                    {i18n.t("profile.units")}
+                  </Text>
                   <View style={styles.unitToggle}>
                     {["METRIC", "IMPERIAL"].map((u) => (
                       <TouchableOpacity
@@ -446,9 +528,12 @@ export default function ProfileScreen() {
                 </View>
               </View>
 
-              <Text style={styles.fieldLabel}>Fitness Goal</Text>
+              <Text style={styles.fieldLabel}>
+                {i18n.t("profile.fitnessGoal")}
+              </Text>
+
               <View style={styles.optionsGrid}>
-                {Object.entries(GOAL_LABELS).map(([key, label]) => (
+                {GOALS.map((key) => (
                   <TouchableOpacity
                     key={key}
                     style={[
@@ -464,15 +549,18 @@ export default function ProfileScreen() {
                         form.goal === key && styles.optionChipTextActive,
                       ]}
                     >
-                      {label}
+                      {i18n.t(`profile.goals.${key}`)}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
-              <Text style={styles.fieldLabel}>Fitness Level</Text>
+              <Text style={styles.fieldLabel}>
+                {i18n.t("profile.fitnessLevel")}
+              </Text>
+
               <View style={styles.optionsGrid}>
-                {Object.entries(LEVEL_LABELS).map(([key, label]) => (
+                {LEVELS.map((key) => (
                   <TouchableOpacity
                     key={key}
                     style={[
@@ -488,13 +576,15 @@ export default function ProfileScreen() {
                         form.level === key && styles.optionChipTextActive,
                       ]}
                     >
-                      {label}
+                      {i18n.t(`profile.levels.${key}`)}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
-              <Text style={styles.fieldLabel}>Training Days</Text>
+              <Text style={styles.fieldLabel}>
+                {i18n.t("profile.trainingDays")}
+              </Text>
               <View style={styles.daysGrid}>
                 {TRAINING_DAYS.map((day) => (
                   <TouchableOpacity
@@ -513,14 +603,14 @@ export default function ProfileScreen() {
                           styles.dayButtonTextActive,
                       ]}
                     >
-                      {day}
+                      {i18n.t(`profile.days.${day}`)}
                     </Text>
                   </TouchableOpacity>
                 ))}
               </View>
 
               <Button
-                title="Save Profile"
+                title={i18n.t("profile.saveProfile")}
                 onPress={handleSave}
                 loading={saveMutation.isPending}
               />
@@ -539,13 +629,13 @@ export default function ProfileScreen() {
 
       <AlertModal
         visible={logoutAlertVisible}
-        title="Log Out"
-        message="Are you sure you want to log out?"
+        title={i18n.t("profile.logout")}
+        message={i18n.t("profile.logoutConfirm")}
         type="warning"
         onClose={() => setLogoutAlertVisible(false)}
-        confirmText="Log Out"
+        confirmText={i18n.t("profile.logout")}
         onConfirm={logout}
-        cancelText="Cancel"
+        cancelText={i18n.t("common.cancel")}
       />
     </View>
   );
@@ -650,13 +740,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.7)",
     justifyContent: "flex-end",
+    paddingTop: 20,
   },
   modalContent: {
     backgroundColor: "#1A1A1A",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
-    paddingBottom: 40,
+    paddingBottom: 60,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   modalHeader: {
     flexDirection: "row",

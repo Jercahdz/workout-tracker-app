@@ -7,7 +7,9 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   TextInput,
+  Image,
 } from "react-native";
+import i18n from "../../lib/i18n";
 import { useRouter } from "expo-router";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,17 +20,17 @@ import { Badge } from "../../components/ui/Badge";
 import {
   MUSCLE_GROUP_COLORS,
   getMuscleGroupColor,
-  getWorkoutColor,
 } from "../../lib/constants/muscleGroups";
 
-const MUSCLE_GROUP_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
-  CHEST: "body-outline",
-  BACK: "body-outline",
-  SHOULDERS: "body-outline",
-  ARMS: "body-outline",
-  LEGS: "body-outline",
-  CORE: "body-outline",
-  FULL_BODY: "body-outline",
+const MUSCLE_GROUP_ICONS: Record<string, any> = {
+  CHEST: require("../../assets/icons/app_chest.png"),
+  BACK: require("../../assets/icons/app_back.png"),
+  SHOULDERS: require("../../assets/icons/app_shoulders.png"),
+  ARMS: require("../../assets/icons/app_arms.png"),
+  LEGS: require("../../assets/icons/app_legs.png"),
+  CORE: require("../../assets/icons/app_core.png"),
+  FULL_BODY: require("../../assets/icons/app_full_body.png"),
+  EXERCISES: require("../../assets/icons/app_exercises.png"),
 };
 
 const FILTERS = [
@@ -41,6 +43,51 @@ const FILTERS = [
   "CORE",
   "FULL_BODY",
 ];
+
+const FILTER_LABELS: Record<string, string> = {
+  ALL: i18n.t("exercises.all"),
+  CHEST: i18n.t("exercises.chest"),
+  BACK: i18n.t("exercises.back"),
+  SHOULDERS: i18n.t("exercises.shoulders"),
+  ARMS: i18n.t("exercises.arms"),
+  LEGS: i18n.t("exercises.legs"),
+  CORE: i18n.t("exercises.core"),
+  FULL_BODY: i18n.t("exercises.fullBody"),
+};
+
+const MUSCLE_GROUP_TRANSLATIONS: Record<string, string> = {
+  CHEST: i18n.t("exercises.chest"),
+  BACK: i18n.t("exercises.back"),
+  SHOULDERS: i18n.t("exercises.shoulders"),
+  ARMS: i18n.t("exercises.arms"),
+  LEGS: i18n.t("exercises.legs"),
+  CORE: i18n.t("exercises.core"),
+  FULL_BODY: i18n.t("exercises.fullBody"),
+};
+
+const EQUIPMENT_TRANSLATIONS: Record<string, string> = {
+  Barbell: i18n.t("exercises.equipment.barbell"),
+  Dumbbells: i18n.t("exercises.equipment.dumbbells"),
+  Dumbbell: i18n.t("exercises.equipment.dumbbell"),
+  "Cable Machine": i18n.t("exercises.equipment.cableMachine"),
+  "Pull-up Bar": i18n.t("exercises.equipment.pullUpBar"),
+  Machine: i18n.t("exercises.equipment.machine"),
+  Plates: i18n.t("exercises.equipment.plates"),
+  "Parallel Bars": i18n.t("exercises.equipment.parallelBars"),
+  "Leg Press Machine": i18n.t("exercises.equipment.legPressMachine"),
+  Kettlebell: i18n.t("exercises.equipment.kettlebell"),
+  "Ab Wheel": i18n.t("exercises.equipment.abWheel"),
+  Box: i18n.t("exercises.equipment.box"),
+  "Battle Ropes": i18n.t("exercises.equipment.battleRopes"),
+  "Medicine Ball": i18n.t("exercises.equipment.medicineBall"),
+  Sled: i18n.t("exercises.equipment.sled"),
+  Rope: i18n.t("exercises.equipment.rope"),
+  Prowler: i18n.t("exercises.equipment.prowler"),
+  Sandbag: i18n.t("exercises.equipment.sandbag"),
+  Bodyweight: i18n.t("exercises.equipment.bodyweight"),
+  "T-Bar": i18n.t("exercises.equipment.tBar"),
+  "EZ Bar": i18n.t("exercises.equipment.ezBar"),
+};
 
 export default function ExercisesScreen() {
   const insets = useSafeAreaInsets();
@@ -75,9 +122,9 @@ export default function ExercisesScreen() {
   return (
     <View style={styles.container}>
       <View style={[styles.headerContainer, { paddingTop: insets.top + 20 }]}>
-        <Text style={styles.title}>Exercises</Text>
+        <Text style={styles.title}>{i18n.t("exercises.title")}</Text>
         <Text style={styles.subtitle}>
-          {data?.meta?.total ?? 0} exercises available
+          {data?.meta?.total ?? 0} {i18n.t("exercises.available")}
         </Text>
 
         <ScrollView
@@ -101,7 +148,7 @@ export default function ExercisesScreen() {
                   selectedFilter === filter && styles.filterTextActive,
                 ]}
               >
-                {filter === "ALL" ? "All" : filter.replace("_", " ")}
+                {FILTER_LABELS[filter]}
               </Text>
             </TouchableOpacity>
           ))}
@@ -116,7 +163,7 @@ export default function ExercisesScreen() {
           />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search exercises..."
+            placeholder={i18n.t("exercises.search")}
             placeholderTextColor="#888888"
             value={search}
             onChangeText={setSearch}
@@ -135,11 +182,13 @@ export default function ExercisesScreen() {
           <Card>
             <View style={styles.emptyContainer}>
               <Ionicons name="body-outline" size={48} color="#2A2A2A" />
-              <Text style={styles.emptyTitle}>No exercises found</Text>
+              <Text style={styles.emptyTitle}>
+                {i18n.t("exercises.noExercises")}
+              </Text>
               <Text style={styles.emptyText}>
                 {selectedFilter === "ALL"
-                  ? "No exercises in the catalog yet"
-                  : `No ${selectedFilter.replace("_", " ").toLowerCase()} exercises yet`}
+                  ? i18n.t("exercises.noExercisesAll")
+                  : i18n.t("exercises.noExercisesFilter")}
               </Text>
             </View>
           </Card>
@@ -180,23 +229,45 @@ export default function ExercisesScreen() {
                     },
                   ]}
                 >
-                  <Ionicons
-                    name="barbell-outline"
-                    size={22}
-                    color={
-                      MUSCLE_GROUP_COLORS[exercise.muscleGroup] ?? "#888888"
-                    }
-                  />
+                  {MUSCLE_GROUP_ICONS[exercise.muscleGroup] ? (
+                    <Image
+                      source={MUSCLE_GROUP_ICONS[exercise.muscleGroup]}
+                      style={[
+                        styles.exerciseIconImage,
+                        {
+                          tintColor: MUSCLE_GROUP_COLORS[exercise.muscleGroup],
+                        },
+                      ]}
+                      resizeMode="contain"
+                    />
+                  ) : (
+                    <Image
+                      source={MUSCLE_GROUP_ICONS[exercise.muscleGroup]}
+                      style={[
+                        styles.exerciseIconImage,
+                        {
+                          tintColor: MUSCLE_GROUP_COLORS[exercise.muscleGroup ?? "#888888"],
+                        },
+                      ]}
+                      resizeMode="contain"
+                    />
+                  )}
                 </View>
                 <View style={styles.exerciseInfo}>
                   <Text style={styles.exerciseName}>{exercise.name}</Text>
                   <View style={styles.exerciseMeta}>
                     <Badge
-                      label={exercise.muscleGroup.replace("_", " ")}
+                      label={
+                        MUSCLE_GROUP_TRANSLATIONS[exercise.muscleGroup] ??
+                        exercise.muscleGroup.replace("_", " ")
+                      }
                       variant="muted"
                     />
                     {exercise.equipment && (
-                      <Text style={styles.equipment}>{exercise.equipment}</Text>
+                      <Text style={styles.equipment}>
+                        {EQUIPMENT_TRANSLATIONS[exercise.equipment] ??
+                          exercise.equipment}
+                      </Text>
                     )}
                   </View>
                 </View>
@@ -318,6 +389,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
+  },
+  exerciseIconImage: {
+    width: 28,
+    height: 28,
   },
   exerciseInfo: {
     flex: 1,

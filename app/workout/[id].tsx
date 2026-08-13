@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  Image,
 } from "react-native";
+import i18n from "../../lib/i18n";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,9 +25,19 @@ import { Badge } from "../../components/ui/Badge";
 import { AlertModal } from "../../components/ui/AlertModal";
 import {
   MUSCLE_GROUP_COLORS,
-  getWorkoutColor,
   getMuscleGroupColor,
 } from "../../lib/constants/muscleGroups";
+
+const MUSCLE_GROUP_ICONS: Record<string, any> = {
+  CHEST: require("../../assets/icons/app_chest.png"),
+  BACK: require("../../assets/icons/app_back.png"),
+  SHOULDERS: require("../../assets/icons/app_shoulders.png"),
+  ARMS: require("../../assets/icons/app_arms.png"),
+  LEGS: require("../../assets/icons/app_legs.png"),
+  CORE: require("../../assets/icons/app_core.png"),
+  FULL_BODY: require("../../assets/icons/app_full_body.png"),
+  EXERCISES: require("../../assets/icons/app_exercises.png"),
+};
 
 export default function WorkoutDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -97,8 +109,8 @@ export default function WorkoutDetailScreen() {
     },
     onError: () => {
       setAlertConfig({
-        title: "Error",
-        message: "Could not update workout.",
+        title: i18n.t("common.error"),
+        message: i18n.t("workoutDetail.errorUpdate"),
         type: "error",
       });
       setAlertVisible(true);
@@ -117,16 +129,16 @@ export default function WorkoutDetailScreen() {
       setSessionModal(false);
       setSessionNotes("");
       setAlertConfig({
-        title: "Session Logged",
-        message: "Great job! Your session has been recorded.",
+        title: i18n.t("workoutDetail.sessionLogged"),
+        message: i18n.t("workoutDetail.sessionLoggedMsg"),
         type: "success",
       });
       setAlertVisible(true);
     },
     onError: () => {
       setAlertConfig({
-        title: "Error",
-        message: "Could not log session.",
+        title: i18n.t("common.error"),
+        message: i18n.t("workoutDetail.errorSession"),
         type: "error",
       });
       setAlertVisible(true);
@@ -136,8 +148,8 @@ export default function WorkoutDetailScreen() {
   const handleAddExercise = () => {
     if (!selectedExercise) {
       setAlertConfig({
-        title: "No Exercise Selected",
-        message: "Please select an exercise.",
+        title: i18n.t("workoutDetail.noExerciseSelected"),
+        message: i18n.t("workoutDetail.noExerciseSelectedMsg"),
         type: "warning",
       });
       setAlertVisible(true);
@@ -152,8 +164,8 @@ export default function WorkoutDetailScreen() {
 
     if (!sets || !reps) {
       setAlertConfig({
-        title: "Invalid Values",
-        message: "Please enter valid sets and reps.",
+        title: i18n.t("workoutDetail.invalidValues"),
+        message: i18n.t("workoutDetail.invalidValuesMsg"),
         type: "warning",
       });
       setAlertVisible(true);
@@ -190,8 +202,8 @@ export default function WorkoutDetailScreen() {
 
     if (!sets || !reps) {
       setAlertConfig({
-        title: "Invalid Values",
-        message: "Please enter valid sets and reps.",
+        title: i18n.t("workoutDetail.invalidValues"),
+        message: i18n.t("workoutDetail.invalidValuesMsg"),
         type: "warning",
       });
       setAlertVisible(true);
@@ -236,7 +248,7 @@ export default function WorkoutDetailScreen() {
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
         <Text style={styles.title} numberOfLines={1}>
-          {workout?.name ?? "Workout"}
+          {workout?.name ?? i18n.t("workouts.title")}
         </Text>
         <TouchableOpacity
           style={styles.addButton}
@@ -259,10 +271,21 @@ export default function WorkoutDetailScreen() {
             workout.workoutExercises.length === 0) && (
             <Card>
               <View style={styles.emptyContainer}>
-                <Ionicons name="barbell-outline" size={48} color="#2A2A2A" />
-                <Text style={styles.emptyTitle}>No exercises yet</Text>
+                <Image
+                  source={MUSCLE_GROUP_ICONS["EXERCISES"]}
+                  style={[
+                    styles.emptyIcon,
+                    {
+                      tintColor: "#888888",
+                    },
+                  ]}
+                  resizeMode="contain"
+                />
+                <Text style={styles.emptyTitle}>
+                  {i18n.t("workoutDetail.noExercises")}
+                </Text>
                 <Text style={styles.emptyText}>
-                  Tap the + button to add exercises
+                  {i18n.t("workoutDetail.noExercisesSubtitle")}
                 </Text>
               </View>
             </Card>
@@ -286,7 +309,22 @@ export default function WorkoutDetailScreen() {
                       { backgroundColor: `${color}20` },
                     ]}
                   >
-                    <Ionicons name="barbell-outline" size={20} color={color} />
+                    {MUSCLE_GROUP_ICONS[we.exercise?.muscleGroup] ? (
+                      <Image
+                        source={MUSCLE_GROUP_ICONS[we.exercise?.muscleGroup]}
+                        style={[
+                          styles.exerciseIconImage,
+                          {
+                            width: 28,
+                            height: 28,
+                            tintColor: color,
+                          },
+                        ]}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Ionicons name="barbell-outline" size={20} color={color} />
+                    )}
                   </View>
                   <View style={styles.exerciseInfo}>
                     <TouchableOpacity
@@ -309,8 +347,14 @@ export default function WorkoutDetailScreen() {
                       </Text>
                     </TouchableOpacity>
                     <View style={styles.exerciseMeta}>
-                      <Badge label={`${we.sets} sets`} variant="muted" />
-                      <Badge label={`${we.reps} reps`} variant="muted" />
+                      <Badge
+                        label={`${we.sets} ${i18n.t("workoutDetail.sets")}`}
+                        variant="muted"
+                      />
+                      <Badge
+                        label={`${we.reps} ${i18n.t("workoutDetail.reps")}`}
+                        variant="muted"
+                      />
                       {we.weight && (
                         <Badge
                           label={`${we.weight} ${we.unitSystem === "IMPERIAL" ? "lb" : "kg"}`}
@@ -350,7 +394,7 @@ export default function WorkoutDetailScreen() {
 
         {!isLoading && workout?.workoutExercises?.length > 0 && (
           <Button
-            title="Log Session"
+            title={i18n.t("workoutDetail.logSession")}
             onPress={() => setSessionModal(true)}
             variant="primary"
           />
@@ -367,7 +411,9 @@ export default function WorkoutDetailScreen() {
           <ScrollView>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Add Exercise</Text>
+                <Text style={styles.modalTitle}>
+                  {i18n.t("workoutDetail.addExercise")}
+                </Text>
                 <TouchableOpacity
                   onPress={() => setAddExerciseModal(false)}
                   activeOpacity={0.7}
@@ -376,12 +422,14 @@ export default function WorkoutDetailScreen() {
                 </TouchableOpacity>
               </View>
 
-              <Text style={styles.fieldLabel}>Select Exercise</Text>
+              <Text style={styles.fieldLabel}>
+                {i18n.t("workoutDetail.selectExercise")}
+              </Text>
               <View style={styles.searchContainer}>
                 <Ionicons name="search-outline" size={16} color="#888888" />
                 <TextInput
                   style={styles.searchInput}
-                  placeholder="Search exercises..."
+                  placeholder={i18n.t("workoutDetail.searchExercises")}
                   placeholderTextColor="#888888"
                   value={exerciseSearch}
                   onChangeText={setExerciseSearch}
@@ -427,14 +475,29 @@ export default function WorkoutDetailScreen() {
                           },
                         ]}
                       >
-                        <Ionicons
-                          name="barbell-outline"
-                          size={16}
-                          color={
-                            MUSCLE_GROUP_COLORS[exercise.muscleGroup] ??
-                            "#888888"
-                          }
-                        />
+                        {MUSCLE_GROUP_ICONS[exercise.muscleGroup] ? (
+                          <Image
+                            source={MUSCLE_GROUP_ICONS[exercise.muscleGroup]}
+                            style={[
+                              styles.exerciseIconImage,
+                              {
+                                width: 20,
+                                height: 20,
+                                tintColor: MUSCLE_GROUP_COLORS[exercise.muscleGroup],
+                              },
+                            ]}
+                            resizeMode="contain"
+                          />
+                        ) : (
+                          <Ionicons
+                            name="barbell-outline"
+                            size={16}
+                            color={
+                              MUSCLE_GROUP_COLORS[exercise.muscleGroup] ??
+                              "#888888"
+                            }
+                          />
+                        )}
                       </View>
                       <Text
                         style={[
@@ -455,7 +518,7 @@ export default function WorkoutDetailScreen() {
               <View style={styles.formRow}>
                 <View style={styles.formThird}>
                   <Input
-                    label="Sets"
+                    label={i18n.t("workoutDetail.sets")}
                     placeholder="3"
                     keyboardType="numeric"
                     value={exerciseForm.sets}
@@ -466,7 +529,7 @@ export default function WorkoutDetailScreen() {
                 </View>
                 <View style={styles.formThird}>
                   <Input
-                    label="Reps"
+                    label={i18n.t("workoutDetail.reps")}
                     placeholder="10"
                     keyboardType="numeric"
                     value={exerciseForm.reps}
@@ -477,7 +540,7 @@ export default function WorkoutDetailScreen() {
                 </View>
                 <View style={styles.formThird}>
                   <Input
-                    label="Weight"
+                    label={i18n.t("workoutDetail.weight")}
                     placeholder="0"
                     keyboardType="decimal-pad"
                     value={exerciseForm.weight}
@@ -489,7 +552,7 @@ export default function WorkoutDetailScreen() {
               </View>
 
               <Button
-                title="Add Exercise"
+                title={i18n.t("workoutDetail.addExercise")}
                 onPress={handleAddExercise}
                 loading={updateMutation.isPending}
               />
@@ -521,7 +584,7 @@ export default function WorkoutDetailScreen() {
             <View style={styles.formRow}>
               <View style={styles.formThird}>
                 <Input
-                  label="Sets"
+                  label={i18n.t("workoutDetail.sets")}
                   placeholder="3"
                   keyboardType="numeric"
                   value={editForm.sets}
@@ -530,7 +593,7 @@ export default function WorkoutDetailScreen() {
               </View>
               <View style={styles.formThird}>
                 <Input
-                  label="Reps"
+                  label={i18n.t("workoutDetail.reps")}
                   placeholder="10"
                   keyboardType="numeric"
                   value={editForm.reps}
@@ -539,7 +602,7 @@ export default function WorkoutDetailScreen() {
               </View>
               <View style={styles.formThird}>
                 <Input
-                  label="Weight"
+                  label={i18n.t("workoutDetail.weight")}
                   placeholder="0"
                   keyboardType="decimal-pad"
                   value={editForm.weight}
@@ -549,7 +612,7 @@ export default function WorkoutDetailScreen() {
             </View>
 
             <Button
-              title="Save Changes"
+              title={i18n.t("workoutDetail.saveChanges")}
               onPress={handleSaveEdit}
               loading={updateMutation.isPending}
             />
@@ -566,7 +629,9 @@ export default function WorkoutDetailScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Log Session</Text>
+              <Text style={styles.modalTitle}>
+                {i18n.t("workoutDetail.logSession")}
+              </Text>
               <TouchableOpacity
                 onPress={() => setSessionModal(false)}
                 activeOpacity={0.7}
@@ -575,12 +640,13 @@ export default function WorkoutDetailScreen() {
               </TouchableOpacity>
             </View>
             <Text style={styles.sessionSummary}>
-              {workout?.workoutExercises?.length} exercises · {workout?.name}
+              {workout?.workoutExercises?.length}{" "}
+              {i18n.t("workoutDetail.exercises")} · {workout?.name}
             </Text>
 
             <Input
-              label="Notes (optional)"
-              placeholder="How did it go?"
+              label={i18n.t("workoutDetail.notes")}
+              placeholder={i18n.t("workoutDetail.notesPlaceholder")}
               value={sessionNotes}
               onChangeText={setSessionNotes}
               multiline
@@ -588,7 +654,7 @@ export default function WorkoutDetailScreen() {
             />
 
             <Button
-              title="Complete Session"
+              title={i18n.t("workoutDetail.completeSession")}
               onPress={() => sessionMutation.mutate()}
               loading={sessionMutation.isPending}
             />
@@ -598,7 +664,9 @@ export default function WorkoutDetailScreen() {
 
       {!isLoading && sessionsData && sessionsData.length > 0 && (
         <View style={styles.sessionsSection}>
-          <Text style={styles.sessionsSectionTitle}>Session History</Text>
+          <Text style={styles.sessionsSectionTitle}>
+            {i18n.t("workoutDetail.logSession")}
+          </Text>
           {sessionsData.map((session: any) => (
             <Card key={session.id} style={styles.sessionCard}>
               <View style={styles.sessionRow}>
@@ -607,12 +675,15 @@ export default function WorkoutDetailScreen() {
                 </View>
                 <View style={styles.sessionInfo}>
                   <Text style={styles.sessionDate}>
-                    {new Date(session.completedAt).toLocaleDateString("en-US", {
-                      weekday: "short",
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {new Date(session.completedAt).toLocaleDateString(
+                      i18n.locale,
+                      {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      },
+                    )}
                   </Text>
                   {session.notes && (
                     <Text style={styles.sessionNotes} numberOfLines={1}>
@@ -628,18 +699,18 @@ export default function WorkoutDetailScreen() {
 
       <AlertModal
         visible={!!deleteExerciseTarget}
-        title="Remove Exercise"
-        message="Are you sure you want to remove this exercise from the workout?"
+        title={i18n.t("workoutDetail.removeExercise")}
+        message={i18n.t("workoutDetail.removeExerciseMsg")}
         type="error"
         onClose={() => setDeleteExerciseTarget(null)}
-        confirmText="Remove"
+        confirmText={i18n.t("workoutDetail.remove")}
         onConfirm={() => {
           if (deleteExerciseTarget) {
             handleRemoveExercise(deleteExerciseTarget);
             setDeleteExerciseTarget(null);
           }
         }}
-        cancelText="Cancel"
+        cancelText={i18n.t("common.cancel")}
       />
 
       <AlertModal
@@ -685,6 +756,10 @@ const styles = StyleSheet.create({
   },
   content: { padding: 20, gap: 12 },
   emptyContainer: { alignItems: "center", paddingVertical: 32, gap: 12 },
+  emptyIcon: {
+    width: 48,
+    height: 48,
+  },
   emptyTitle: { color: "#FFFFFF", fontSize: 18, fontWeight: "600" },
   emptyText: { color: "#888888", fontSize: 14, textAlign: "center" },
   exerciseCard: {},
@@ -766,6 +841,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+  },
+  exerciseIconImage: {
+    width: 28,
+    height: 28,
   },
   exerciseOptionText: {
     flex: 1,

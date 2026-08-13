@@ -1,6 +1,15 @@
 import { Tabs } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
+import { Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import i18n from "../../lib/i18n";
+
+const TAB_ICONS: Record<string, any> = {
+  DASHBOARD: require("../../assets/icons/app_home.png"),
+  WORKOUTS: require("../../assets/icons/app_workouts.png"),
+  EXERCISES: require("../../assets/icons/app_exercises.png"),
+  PROGRESS: require("../../assets/icons/app_progress.png"),
+  PROFILE: require("../../assets/icons/app_profile.png"),
+};
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
@@ -28,45 +37,60 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: i18n.t("tabs.home"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+            <Image
+              source={TAB_ICONS.DASHBOARD}
+              style={{ width: size, height: size, tintColor: color }}
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="workouts"
         options={{
-          title: "Workouts",
+          title: i18n.t("tabs.workouts"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="barbell-outline" size={size} color={color} />
+            <Image
+              source={TAB_ICONS.WORKOUTS}
+              style={{ width: size, height: size, tintColor: color }}
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="exercises"
         options={{
-          title: "Exercises",
+          title: i18n.t("tabs.exercises"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="body-outline" size={size} color={color} />
+            <Image
+              source={TAB_ICONS.EXERCISES}
+              style={{ width: size, height: size, tintColor: color }}
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="progress"
         options={{
-          title: "Progress",
+          title: i18n.t("tabs.progress"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="trending-up-outline" size={size} color={color} />
+            <Image
+              source={TAB_ICONS.PROGRESS}
+              style={{ width: size, height: size, tintColor: color }}
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: i18n.t("tabs.profile"),
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
+            <Image
+              source={TAB_ICONS.PROFILE}
+              style={{ width: size, height: size, tintColor: color }}
+            />
           ),
         }}
       />

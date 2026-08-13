@@ -6,7 +6,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
+  Image,
 } from "react-native";
+import i18n from "../../lib/i18n";
 import { useQuery } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,6 +19,25 @@ import { Card } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { useRouter } from "expo-router";
 import { getWorkoutColor } from "../../lib/constants/muscleGroups";
+
+const HOME_ICONS: Record<string, any> = {
+  STREAK: require("../../assets/icons/app_streak.png"),
+  SHIELD: require("../../assets/icons/app_shield.png"),
+  TROPHY: require("../../assets/icons/app_achievement.png"),
+  XP: require("../../assets/icons/app_xp.png"),
+  IA: require("../../assets/icons/app_ai_powered.png"),
+  WORKOUT: require("../../assets/icons/app_exercises.png"),
+};
+
+const MUSCLE_GROUP_ICONS: Record<string, any> = {
+  CHEST: require("../../assets/icons/app_chest.png"),
+  BACK: require("../../assets/icons/app_back.png"),
+  SHOULDERS: require("../../assets/icons/app_shoulders.png"),
+  ARMS: require("../../assets/icons/app_arms.png"),
+  LEGS: require("../../assets/icons/app_legs.png"),
+  CORE: require("../../assets/icons/app_core.png"),
+  FULL_BODY: require("../../assets/icons/app_full_body.png"),
+};
 
 export default function HomeScreen() {
   const { setStats } = useStatsStore();
@@ -55,8 +76,8 @@ export default function HomeScreen() {
       contentContainerStyle={[styles.content, { paddingTop: insets.top + 20 }]}
     >
       <View style={styles.header}>
-        <Text style={styles.greeting}>Good day</Text>
-        <Text style={styles.subtitle}>Keep pushing your limits</Text>
+        <Text style={styles.greeting}>{i18n.t("home.goodDay")}</Text>
+        <Text style={styles.subtitle}>{i18n.t("home.subtitle")}</Text>
       </View>
 
       <TouchableOpacity
@@ -66,12 +87,17 @@ export default function HomeScreen() {
       >
         <View style={styles.aiButtonLeft}>
           <View style={styles.aiButtonIcon}>
-            <Ionicons name="flash" size={20} color="#0F0F0F" />
+            <Image
+              source={HOME_ICONS.IA}
+              style={{ width: 20, height: 20, resizeMode: "contain" }}
+            />
           </View>
           <View>
-            <Text style={styles.aiButtonTitle}>Generate AI Routine</Text>
+            <Text style={styles.aiButtonTitle}>
+              {i18n.t("home.generateAI")}
+            </Text>
             <Text style={styles.aiButtonSubtitle}>
-              Get a personalized workout plan
+              {i18n.t("home.aiSubtitle")}
             </Text>
           </View>
         </View>
@@ -81,21 +107,28 @@ export default function HomeScreen() {
       <Card style={styles.streakCard}>
         <View style={styles.streakRow}>
           <View>
-            <Text style={styles.cardLabel}>Current Streak</Text>
+            <Text style={styles.cardLabel}>{i18n.t("home.currentStreak")}</Text>
             <View style={styles.streakValueRow}>
-              <Ionicons name="flame" size={36} color="#FF6B35" />
+              <Image
+                source={HOME_ICONS.STREAK}
+                style={{ width: 36, height: 36, resizeMode: "contain" }}
+              />
               <Text style={styles.streakValue}>
-                {statsData?.currentStreak ?? 0} days
+                {statsData?.currentStreak ?? 0} {i18n.t("home.days")}
               </Text>
             </View>
             <Text style={styles.streakSub}>
-              Best: {statsData?.bestStreak ?? 0} days
+              {i18n.t("home.bestStreak")}: {statsData?.bestStreak ?? 0}{" "}
+              {i18n.t("home.days")}
             </Text>
           </View>
           <View style={styles.shieldsContainer}>
-            <Text style={styles.cardLabel}>Shields</Text>
+            <Text style={styles.cardLabel}>{i18n.t("home.shields")}</Text>
             <View style={styles.shieldsValueRow}>
-              <Ionicons name="shield" size={28} color="#00FF87" />
+              <Image
+                source={HOME_ICONS.SHIELD}
+                style={{ width: 30, height: 30, resizeMode: "contain" }}
+              />
               <Text style={styles.shieldsValue}>{statsData?.shields ?? 0}</Text>
             </View>
           </View>
@@ -105,13 +138,21 @@ export default function HomeScreen() {
       <Card style={styles.levelCard}>
         <View style={styles.levelRow}>
           <View>
-            <Badge label={statsData?.levelName ?? "Rookie"} variant="primary" />
-            <Text style={styles.levelText}>Level {statsData?.level ?? 1}</Text>
+            <Badge
+              label={statsData?.levelName ?? i18n.t("home.rookie")}
+              variant="primary"
+            />
+            <Text style={styles.levelText}>
+              {i18n.t("home.level")} {statsData?.level ?? 1}
+            </Text>
           </View>
           <View style={styles.sessionsContainer}>
-            <Ionicons name="trophy-outline" size={20} color="#888888" />
+            <Image
+              source={HOME_ICONS.TROPHY}
+              style={{ width: 22, height: 22, resizeMode: "contain" }}
+            />
             <Text style={styles.sessions}>
-              {statsData?.totalSessions ?? 0} sessions
+              {statsData?.totalSessions ?? 0} {i18n.t("home.sessions")}
             </Text>
           </View>
         </View>
@@ -121,50 +162,100 @@ export default function HomeScreen() {
         <View style={styles.xpLabels}>
           <Text style={styles.xpText}>{statsData?.xpProgress ?? 0} XP</Text>
           <Text style={styles.xpText}>
-            {statsData?.xpRequired ?? 0} XP needed
+            {statsData?.xpRequired ?? 0} {i18n.t("home.xpNeeded")}
           </Text>
         </View>
       </Card>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Recent Workouts</Text>
+        <Text style={styles.sectionTitle}>{i18n.t("home.recentWorkouts")}</Text>
       </View>
 
-      {workoutsData?.data?.map((workout: any) => {
-        const color = getWorkoutColor(workout);
-        return (
-          <TouchableOpacity
-            key={workout.id}
-            activeOpacity={0.7}
-            onPress={() => router.push(`/workout/${workout.id}`)}
-          >
-            <Card
-              style={[
-                styles.workoutCard,
-                { borderLeftWidth: 4, borderLeftColor: color },
-              ]}
+      {workoutsData?.data?.length ? (
+        workoutsData.data.map((workout: any) => {
+          const color = getWorkoutColor(workout);
+
+          return (
+            <TouchableOpacity
+              key={workout.id}
+              activeOpacity={0.7}
+              onPress={() => router.push(`/workout/${workout.id}`)}
             >
-              <View style={styles.workoutRow}>
-                <View
-                  style={[
-                    styles.workoutIcon,
-                    { backgroundColor: `${color}20` },
-                  ]}
-                >
-                  <Ionicons name="barbell-outline" size={20} color={color} />
+              <Card
+                style={[
+                  styles.workoutCard,
+                  { borderLeftWidth: 4, borderLeftColor: color },
+                ]}
+              >
+                <View style={styles.workoutRow}>
+                  <View
+                    style={[
+                      styles.workoutIcon,
+                      { backgroundColor: `${color}20` },
+                    ]}
+                  >
+                    {(() => {
+                      const muscleGroups = workout.workoutExercises
+                        ?.map((we: any) => we.exercise?.muscleGroup)
+                        .filter(Boolean);
+                      let primaryMuscleGroup = "EXERCISES";
+                      if (muscleGroups && muscleGroups.length > 0) {
+                        const grouped = muscleGroups.reduce(
+                          (acc: Record<string, number>, mg: string) => {
+                            acc[mg] = (acc[mg] ?? 0) + 1;
+                            return acc;
+                          },
+                          {},
+                        );
+                        primaryMuscleGroup = Object.keys(grouped).sort(
+                          (a, b) => grouped[b] - grouped[a],
+                        )[0];
+                      }
+                      const iconSource =
+                        MUSCLE_GROUP_ICONS[primaryMuscleGroup] ??
+                        HOME_ICONS.WORKOUT;
+                      return (
+                        <Image
+                          source={iconSource}
+                          style={{
+                            width: 28,
+                            height: 28,
+                            resizeMode: "contain",
+                            tintColor: color,
+                          }}
+                        />
+                      );
+                    })()}
+                  </View>
+
+                  <View style={styles.workoutInfo}>
+                    <Text style={styles.workoutName}>{workout.name}</Text>
+                    <Text style={styles.workoutExercises}>
+                      {workout.workoutExercises?.length ?? 0}{" "}
+                      {i18n.t("home.exercises")}
+                    </Text>
+                  </View>
+
+                  <Ionicons name="chevron-forward" size={20} color="#888888" />
                 </View>
-                <View style={styles.workoutInfo}>
-                  <Text style={styles.workoutName}>{workout.name}</Text>
-                  <Text style={styles.workoutExercises}>
-                    {workout.workoutExercises?.length ?? 0} exercises
-                  </Text>
-                </View>
-                <Ionicons name="chevron-forward" size={20} color="#888888" />
-              </View>
-            </Card>
-          </TouchableOpacity>
-        );
-      })}
+              </Card>
+            </TouchableOpacity>
+          );
+        })
+      ) : (
+        <View style={styles.emptyContainer}>
+          <Image
+            source={HOME_ICONS.WORKOUT}
+            style={{
+              width: 40,
+              height: 40,
+              resizeMode: "contain",
+              tintColor: "#888888",
+            }}
+          />
+          <Text style={styles.emptyText}>{i18n.t("home.noWorkouts")}</Text>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -255,7 +346,7 @@ const styles = StyleSheet.create({
   aiButtonIcon: {
     width: 36,
     height: 36,
-    backgroundColor: "rgba(0,0,0,0.15)",
+    backgroundColor: "#0F0F0F",
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",

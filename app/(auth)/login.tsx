@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Alert, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
+import i18n from "../../lib/i18n";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../../components/ui/Input";
@@ -11,8 +12,8 @@ import { useAuthStore } from "../../store/authStore";
 import { AlertModal } from "../../components/ui/AlertModal";
 
 const loginSchema = z.object({
-  email: z.string().email("Invalid email"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  email: z.string().email(i18n.t("auth.invalidEmail")),
+  password: z.string().min(8, i18n.t("auth.passwordMinLength")),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -42,7 +43,7 @@ export default function LoginScreen() {
       const user = await authApi.getMe();
       setUser(user);
     } catch {
-      setAlertMessage("Invalid email or password. Please try again.");
+      setAlertMessage(i18n.t("auth.invalidCredentials"));
       setAlertVisible(true);
     }
   };
@@ -54,8 +55,8 @@ export default function LoginScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome back</Text>
-        <Text style={styles.subtitle}>Log in to continue your journey</Text>
+        <Text style={styles.title}>{i18n.t("auth.welcomeBack")}</Text>
+        <Text style={styles.subtitle}>{i18n.t("auth.loginSubtitle")}</Text>
       </View>
 
       <Controller
@@ -64,8 +65,8 @@ export default function LoginScreen() {
         defaultValue=""
         render={({ field: { onChange, value } }) => (
           <Input
-            label="Email"
-            placeholder="you@example.com"
+            label={i18n.t("auth.email")}
+            placeholder={i18n.t("auth.emailPlaceholder")}
             keyboardType="email-address"
             autoCapitalize="none"
             onChangeText={onChange}
@@ -81,7 +82,7 @@ export default function LoginScreen() {
         defaultValue=""
         render={({ field: { onChange, value } }) => (
           <Input
-            label="Password"
+            label={i18n.t("auth.password")}
             placeholder="••••••••"
             isPassword
             onChangeText={onChange}
@@ -92,27 +93,27 @@ export default function LoginScreen() {
       />
 
       <Button
-        title="Log In"
+        title={i18n.t("auth.login")}
         onPress={handleSubmit(onSubmit)}
         loading={isSubmitting}
       />
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Don't have an account? </Text>
+        <Text style={styles.footerText}>{i18n.t("auth.noAccount")} </Text>
         <Text
           style={styles.footerLink}
           onPress={() => router.push("/(auth)/register")}
         >
-          Sign up
+          {i18n.t("auth.signUp")}
         </Text>
       </View>
       <AlertModal
         visible={alertVisible}
-        title="Login Failed"
+        title={i18n.t("auth.loginFailed")}
         message={alertMessage}
         type="error"
         onClose={() => setAlertVisible(false)}
-        cancelText="Try Again"
+        cancelText={i18n.t("auth.tryAgain")}
       />
     </ScrollView>
   );

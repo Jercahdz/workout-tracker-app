@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  Image,
 } from "react-native";
+import i18n from "../../lib/i18n";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -24,6 +26,18 @@ import {
   getMuscleGroupColor,
   getWorkoutColor,
 } from "../../lib/constants/muscleGroups";
+
+const MUSCLE_GROUP_ICONS: Record<string, any> = {
+  WORKOUT: require("../../assets/icons/app_exercises.png"),
+  CHEST: require("../../assets/icons/app_chest.png"),
+  BACK: require("../../assets/icons/app_back.png"),
+  SHOULDERS: require("../../assets/icons/app_shoulders.png"),
+  ARMS: require("../../assets/icons/app_arms.png"),
+  LEGS: require("../../assets/icons/app_legs.png"),
+  CORE: require("../../assets/icons/app_core.png"),
+  FULL_BODY: require("../../assets/icons/app_full_body.png"),
+  EXERCISE: require("../../assets/icons/app_exercises.png"),
+};
 
 export default function ProgressScreen() {
   const insets = useSafeAreaInsets();
@@ -41,6 +55,7 @@ export default function ProgressScreen() {
   const [selectedExercise, setSelectedExercise] = useState<any>(null);
   const [exerciseSearch, setExerciseSearch] = useState("");
   const [showExercisePicker, setShowExercisePicker] = useState(false);
+  const locale = i18n.locale === "es" ? "es-ES" : "en-US";
 
   const { data, isLoading } = useQuery({
     queryKey: ["progress"],
@@ -67,16 +82,16 @@ export default function ProgressScreen() {
       setWeight("");
       setNotes("");
       setAlertConfig({
-        title: "Logged",
-        message: "Progress entry saved successfully.",
+        title: i18n.t("progress.logged"),
+        message: i18n.t("progress.loggedMsg"),
         type: "success",
       });
       setAlertVisible(true);
     },
     onError: () => {
       setAlertConfig({
-        title: "Error",
-        message: "Could not save progress entry.",
+        title: i18n.t("common.error"),
+        message: i18n.t("progress.errorLog"),
         type: "error",
       });
       setAlertVisible(true);
@@ -87,8 +102,8 @@ export default function ProgressScreen() {
     const weightNum = parseFloat(weight);
     if (!weight || isNaN(weightNum) || weightNum <= 0) {
       setAlertConfig({
-        title: "Invalid Weight",
-        message: "Please enter a valid weight.",
+        title: i18n.t("common.error"),
+        message: i18n.t("progress.errorLog"),
         type: "warning",
       });
       setAlertVisible(true);
@@ -101,21 +116,25 @@ export default function ProgressScreen() {
     .reverse()
     .map((entry: any) => ({
       value: entry.weight,
-      label: new Date(entry.date).toLocaleDateString("en-US", {
+      label: new Date(entry.date).toLocaleDateString(locale, {
         month: "short",
         day: "numeric",
       }),
     }));
 
+  const weightChartDataForDisplay = weightChartData.slice(-4);
+
   const exerciseChartData = (exerciseProgressData ?? [])
     .filter((e: any) => e.weight)
     .map((entry: any) => ({
       value: entry.weight,
-      label: new Date(entry.date).toLocaleDateString("en-US", {
+      label: new Date(entry.date).toLocaleDateString(locale, {
         month: "short",
         day: "numeric",
       }),
     }));
+
+  const exerciseChartDataForDisplay = exerciseChartData.slice(-4);
 
   const latest = data?.data?.[0];
   const previous = data?.data?.[1];
@@ -146,7 +165,7 @@ export default function ProgressScreen() {
         ]}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Progress</Text>
+          <Text style={styles.title}>{i18n.t("progress.title")}</Text>
           {activeTab === "weight" && (
             <TouchableOpacity
               style={styles.addButton}
@@ -170,11 +189,18 @@ export default function ProgressScreen() {
                 activeTab === "weight" && styles.tabTextActive,
               ]}
             >
-              Body Weight
+              {i18n.t("progress.title")}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.tab, activeTab === "exercise" && styles.tabActive]}
+            style={[
+              styles.tab,
+              activeTab === "exercise" && {
+                backgroundColor: selectedExercise
+                  ? getMuscleGroupColor(selectedExercise.muscleGroup)
+                  : "#00FF87",
+              },
+            ]}
             onPress={() => setActiveTab("exercise")}
             activeOpacity={0.7}
           >
@@ -184,7 +210,7 @@ export default function ProgressScreen() {
                 activeTab === "exercise" && styles.tabTextActive,
               ]}
             >
-              Exercise
+              {i18n.t("progress.exercise")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -194,12 +220,16 @@ export default function ProgressScreen() {
             {latest && (
               <View style={styles.statsRow}>
                 <Card style={styles.statCard}>
-                  <Text style={styles.statLabel}>Current Weight</Text>
+                  <Text style={styles.statLabel}>
+                    {i18n.t("progress.change")}
+                  </Text>
                   <Text style={styles.statValue}>{latest.weight}</Text>
                   <Text style={styles.statUnit}>{unit}</Text>
                 </Card>
                 <Card style={styles.statCard}>
-                  <Text style={styles.statLabel}>Change</Text>
+                  <Text style={styles.statLabel}>
+                    {i18n.t("progress.change")}
+                  </Text>
                   <Text
                     style={[
                       styles.statValue,
@@ -212,15 +242,19 @@ export default function ProgressScreen() {
                   >
                     {diff ? (parseFloat(diff) > 0 ? `+${diff}` : diff) : "--"}
                   </Text>
-                  <Text style={styles.statUnit}>from last</Text>
+                  <Text style={styles.statUnit}>
+                    {i18n.t("progress.fromLast")}
+                  </Text>
                 </Card>
               </View>
             )}
 
             {weightChartData.length > 1 ? (
               <Card style={styles.chartCard}>
-                <Text style={styles.chartTitle}>Weight Over Time</Text>
-                <LineChart data={weightChartData} unit={unit} />
+                <Text style={styles.chartTitle}>
+                  {i18n.t("progress.weightOverTime")}
+                </Text>
+                <LineChart data={weightChartDataForDisplay} unit={unit} />
               </Card>
             ) : (
               <Card style={styles.emptyChart}>
@@ -228,23 +262,27 @@ export default function ProgressScreen() {
                   <Ionicons
                     name="trending-up-outline"
                     size={48}
-                    color="#2A2A2A"
+                    color="#888888"
                   />
-                  <Text style={styles.emptyTitle}>Not enough data</Text>
+                  <Text style={styles.emptyTitle}>
+                    {i18n.t("progress.notEnoughData")}
+                  </Text>
                   <Text style={styles.emptyText}>
-                    Log at least 2 entries to see your chart
+                    {i18n.t("progress.notEnoughDataMsg")}
                   </Text>
                 </View>
               </Card>
             )}
 
-            <Text style={styles.sectionTitle}>History</Text>
+            <Text style={styles.sectionTitle}>
+              {i18n.t("progress.history")}
+            </Text>
 
             {data?.data?.length === 0 && (
               <Card>
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyText}>
-                    No entries yet. Start tracking your weight!
+                    {i18n.t("progress.notEnoughDataMsg")}
                   </Text>
                 </View>
               </Card>
@@ -257,14 +295,19 @@ export default function ProgressScreen() {
                     style={[
                       styles.entryIcon,
                       {
-                        backgroundColor: `${getMuscleGroupColor(selectedExercise?.muscleGroup)}20`,
+                        backgroundColor: `${getMuscleGroupColor(
+                          "FULL_BODY",
+                        )}20`,
                       },
                     ]}
                   >
-                    <Ionicons
-                      name="barbell-outline"
-                      size={20}
-                      color={getMuscleGroupColor(selectedExercise?.muscleGroup)}
+                    <Image
+                      source={MUSCLE_GROUP_ICONS.FULL_BODY}
+                      style={{
+                        width: 22,
+                        height: 22,
+                      }}
+                      resizeMode="contain"
                     />
                   </View>
                   <View style={styles.entryInfo}>
@@ -273,7 +316,7 @@ export default function ProgressScreen() {
                       {entry.unitSystem === "IMPERIAL" ? "lb" : "kg"}
                     </Text>
                     <Text style={styles.entryDate}>
-                      {new Date(entry.date).toLocaleDateString("en-US", {
+                      {new Date(entry.date).toLocaleDateString(locale, {
                         weekday: "short",
                         month: "short",
                         day: "numeric",
@@ -298,10 +341,20 @@ export default function ProgressScreen() {
               onPress={() => setShowExercisePicker(true)}
               activeOpacity={0.7}
             >
-              <Ionicons
-                name="barbell-outline"
-                size={20}
-                color={getMuscleGroupColor(selectedExercise?.muscleGroup)}
+              <Image
+                source={
+                  selectedExercise?.muscleGroup
+                    ? MUSCLE_GROUP_ICONS[selectedExercise.muscleGroup]
+                    : MUSCLE_GROUP_ICONS.EXERCISE
+                }
+                style={{
+                  width: 28,
+                  height: 28,
+                  resizeMode: "contain",
+                  tintColor: selectedExercise?.muscleGroup
+                    ? getMuscleGroupColor(selectedExercise.muscleGroup)
+                    : "#00FF87",
+                }}
               />
               <Text
                 style={[
@@ -311,7 +364,7 @@ export default function ProgressScreen() {
               >
                 {selectedExercise
                   ? selectedExercise.name
-                  : "Select an exercise"}
+                  : i18n.t("progress.selectExercise")}
               </Text>
               <Ionicons name="chevron-down" size={20} color="#888888" />
             </TouchableOpacity>
@@ -319,10 +372,12 @@ export default function ProgressScreen() {
             {!selectedExercise && (
               <Card style={styles.emptyChart}>
                 <View style={styles.emptyContainer}>
-                  <Ionicons name="barbell-outline" size={48} color="#2A2A2A" />
-                  <Text style={styles.emptyTitle}>Select an exercise</Text>
+                  <Ionicons name="barbell-outline" size={48} color="#888888" />
+                  <Text style={styles.emptyTitle}>
+                    {i18n.t("progress.selectExercise")}
+                  </Text>
                   <Text style={styles.emptyText}>
-                    Choose an exercise to see your weight progression
+                    {i18n.t("progress.selectExerciseMsg")}
                   </Text>
                 </View>
               </Card>
@@ -340,7 +395,9 @@ export default function ProgressScreen() {
                 <>
                   <View style={styles.statsRow}>
                     <Card style={styles.statCard}>
-                      <Text style={styles.statLabel}>Best Weight</Text>
+                      <Text style={styles.statLabel}>
+                        {i18n.t("progress.bestWeight")}
+                      </Text>
                       <Text style={styles.statValue}>
                         {Math.max(
                           ...exerciseChartData.map((e: any) => e.value),
@@ -353,30 +410,40 @@ export default function ProgressScreen() {
                       </Text>
                     </Card>
                     <Card style={styles.statCard}>
-                      <Text style={styles.statLabel}>Sessions</Text>
+                      <Text style={styles.statLabel}>
+                        {i18n.t("progress.bestWeight")}
+                      </Text>
                       <Text style={styles.statValue}>
                         {exerciseChartData.length}
                       </Text>
-                      <Text style={styles.statUnit}>logged</Text>
+                      <Text style={styles.statUnit}>
+                        {i18n.t("progress.logged2")}
+                      </Text>
                     </Card>
                   </View>
 
                   {exerciseChartData.length > 1 && (
                     <Card style={styles.chartCard}>
-                      <Text style={styles.chartTitle}>Weight Progression</Text>
+                      <Text style={styles.chartTitle}>
+                        {i18n.t("progress.weightProgression")}
+                      </Text>
                       <LineChart
-                        data={exerciseChartData}
+                        data={exerciseChartDataForDisplay}
                         unit={
                           exerciseProgressData?.[0]?.unitSystem === "IMPERIAL"
                             ? "lb"
                             : "kg"
                         }
-                        color={getMuscleGroupColor(selectedExercise?.muscleGroup)}
+                        color={getMuscleGroupColor(
+                          selectedExercise?.muscleGroup,
+                        )}
                       />
                     </Card>
                   )}
 
-                  <Text style={styles.sectionTitle}>History</Text>
+                  <Text style={styles.sectionTitle}>
+                    {i18n.t("progress.history")}
+                  </Text>
                   {exerciseProgressData
                     ?.filter((e: any) => e.weight)
                     .map((entry: any, index: number) => (
@@ -401,12 +468,24 @@ export default function ProgressScreen() {
                               },
                             ]}
                           >
-                            <Ionicons
-                              name="barbell-outline"
-                              size={20}
-                              color={getMuscleGroupColor(
-                                selectedExercise?.muscleGroup,
-                              )}
+                            <Image
+                              source={
+                                selectedExercise?.muscleGroup
+                                  ? MUSCLE_GROUP_ICONS[
+                                      selectedExercise.muscleGroup
+                                    ]
+                                  : MUSCLE_GROUP_ICONS.EXERCISE
+                              }
+                              style={{
+                                width: 22,
+                                height: 22,
+                                resizeMode: "contain",
+                                tintColor: selectedExercise?.muscleGroup
+                                  ? getMuscleGroupColor(
+                                      selectedExercise.muscleGroup,
+                                    )
+                                  : "#00FF87",
+                              }}
                             />
                           </View>
                           <View style={styles.entryInfo}>
@@ -416,14 +495,11 @@ export default function ProgressScreen() {
                               {entry.sets}x{entry.reps}
                             </Text>
                             <Text style={styles.entryDate}>
-                              {new Date(entry.date).toLocaleDateString(
-                                "en-US",
-                                {
-                                  weekday: "short",
-                                  month: "short",
-                                  day: "numeric",
-                                },
-                              )}
+                              {new Date(entry.date).toLocaleDateString(locale, {
+                                weekday: "short",
+                                month: "short",
+                                day: "numeric",
+                              })}
                             </Text>
                           </View>
                         </View>
@@ -442,10 +518,12 @@ export default function ProgressScreen() {
                       size={48}
                       color="#2A2A2A"
                     />
-                    <Text style={styles.emptyTitle}>No data yet</Text>
+                    <Text style={styles.emptyTitle}>
+                      {i18n.t("progress.noData")}
+                    </Text>
                     <Text style={styles.emptyText}>
-                      Log sessions with {selectedExercise.name} to track your
-                      progression
+                      {i18n.t("progress.noDataMsg")} {selectedExercise.name}{" "}
+                      {i18n.t("progress.noDataMsg2")}
                     </Text>
                   </View>
                 </Card>
@@ -463,7 +541,9 @@ export default function ProgressScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Exercise</Text>
+              <Text style={styles.modalTitle}>
+                {i18n.t("progress.selectExercise")}
+              </Text>
               <TouchableOpacity
                 onPress={() => setShowExercisePicker(false)}
                 activeOpacity={0.7}
@@ -475,7 +555,7 @@ export default function ProgressScreen() {
               <Ionicons name="search-outline" size={16} color="#888888" />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search exercises..."
+                placeholder={i18n.t("exercises.search")}
                 placeholderTextColor="#888888"
                 value={exerciseSearch}
                 onChangeText={setExerciseSearch}
@@ -516,13 +596,29 @@ export default function ProgressScreen() {
                       },
                     ]}
                   >
-                    <Ionicons
-                      name="barbell-outline"
-                      size={16}
-                      color={
-                        MUSCLE_GROUP_COLORS[exercise.muscleGroup] ?? "#888888"
-                      }
-                    />
+                    {MUSCLE_GROUP_ICONS[exercise.muscleGroup] ? (
+                      <Image
+                        source={MUSCLE_GROUP_ICONS[exercise.muscleGroup]}
+                        style={[
+                          styles.exerciseIconImage,
+                          {
+                            width: 20,
+                            height: 20,
+                            tintColor:
+                              MUSCLE_GROUP_COLORS[exercise.muscleGroup],
+                          },
+                        ]}
+                        resizeMode="contain"
+                      />
+                    ) : (
+                      <Ionicons
+                        name="barbell-outline"
+                        size={16}
+                        color={
+                          MUSCLE_GROUP_COLORS[exercise.muscleGroup] ?? "#888888"
+                        }
+                      />
+                    )}
                   </View>
 
                   <Text
@@ -553,7 +649,9 @@ export default function ProgressScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Log Weight</Text>
+              <Text style={styles.modalTitle}>
+                {i18n.t("progress.logWeight")}
+              </Text>
               <TouchableOpacity
                 onPress={() => setModalVisible(false)}
                 activeOpacity={0.7}
@@ -562,22 +660,22 @@ export default function ProgressScreen() {
               </TouchableOpacity>
             </View>
             <Input
-              label="Weight"
+              label={i18n.t("progress.currentWeight")}
               placeholder="e.g. 75.5"
               keyboardType="decimal-pad"
               value={weight}
               onChangeText={setWeight}
             />
             <Input
-              label="Notes (optional)"
-              placeholder="How are you feeling?"
+              label={i18n.t("workoutDetail.notes")}
+              placeholder={i18n.t("progress.notesPlaceholder")}
               value={notes}
               onChangeText={setNotes}
               multiline
               numberOfLines={3}
             />
             <Button
-              title="Save Entry"
+              title={i18n.t("progress.saveEntry")}
               onPress={handleLog}
               loading={logMutation.isPending}
             />
@@ -738,5 +836,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+  },
+  exerciseIconImage: {
+    width: 28,
+    height: 28,
   },
 });

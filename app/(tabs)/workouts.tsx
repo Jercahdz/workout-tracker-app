@@ -8,7 +8,9 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
+  Image,
 } from "react-native";
+import i18n from "../../lib/i18n";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,7 +20,21 @@ import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Input";
 import { AlertModal } from "../../components/ui/AlertModal";
-import { MUSCLE_GROUP_COLORS, getMuscleGroupColor, getWorkoutColor } from "../../lib/constants/muscleGroups";
+import { getWorkoutColor } from "../../lib/constants/muscleGroups";
+
+const WORKOUT_ICONS: Record<string, any> = {
+  WORKOUT: require("../../assets/icons/app_exercises.png"),
+};
+
+const MUSCLE_GROUP_ICONS: Record<string, any> = {
+  CHEST: require("../../assets/icons/app_chest.png"),
+  BACK: require("../../assets/icons/app_back.png"),
+  SHOULDERS: require("../../assets/icons/app_shoulders.png"),
+  ARMS: require("../../assets/icons/app_arms.png"),
+  LEGS: require("../../assets/icons/app_legs.png"),
+  CORE: require("../../assets/icons/app_core.png"),
+  FULL_BODY: require("../../assets/icons/app_full_body.png"),
+};
 
 export default function WorkoutsScreen() {
   const insets = useSafeAreaInsets();
@@ -56,8 +72,8 @@ export default function WorkoutsScreen() {
     },
     onError: () => {
       setAlertConfig({
-        title: "Error",
-        message: "Could not create workout.",
+        title: i18n.t("common.error"),
+        message: i18n.t("workouts.errorCreate"),
         type: "error",
       });
       setAlertVisible(true);
@@ -74,8 +90,8 @@ export default function WorkoutsScreen() {
     },
     onError: (error) => {
       setAlertConfig({
-        title: "Error",
-        message: "Could not delete workout.",
+        title: i18n.t("common.error"),
+        message: i18n.t("workouts.errorDelete"),
         type: "error",
       });
       setAlertVisible(true);
@@ -89,8 +105,8 @@ export default function WorkoutsScreen() {
   const handleCreate = () => {
     if (!workoutName.trim()) {
       setAlertConfig({
-        title: "Missing Name",
-        message: "Please enter a name for your workout.",
+        title: i18n.t("workouts.missingName"),
+        message: i18n.t("workouts.missingNameMsg"),
         type: "warning",
       });
       setAlertVisible(true);
@@ -111,13 +127,13 @@ export default function WorkoutsScreen() {
 
       let label = "";
       if (diffDays < 7) {
-        label = "This Week";
+        label = i18n.t("workouts.thisWeek");
       } else if (diffDays < 14) {
-        label = "Last Week";
+        label = i18n.t("workouts.lastWeek");
       } else if (diffDays < 30) {
-        label = "This Month";
+        label = i18n.t("workouts.thisMonth");
       } else {
-        label = "Older";
+        label = i18n.t("workouts.older");
       }
 
       const existing = groups.find((g) => g.label === label);
@@ -148,7 +164,7 @@ export default function WorkoutsScreen() {
         ]}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Workouts</Text>
+          <Text style={styles.title}>{i18n.t("workouts.title")}</Text>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => setModalVisible(true)}
@@ -162,7 +178,7 @@ export default function WorkoutsScreen() {
           <Ionicons name="search-outline" size={18} color="#888888" />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search workouts..."
+            placeholder={i18n.t("workouts.search")}
             placeholderTextColor="#888888"
             value={search}
             onChangeText={setSearch}
@@ -178,10 +194,20 @@ export default function WorkoutsScreen() {
         {data?.data?.length === 0 && (
           <Card>
             <View style={styles.emptyContainer}>
-              <Ionicons name="barbell-outline" size={48} color="#2A2A2A" />
-              <Text style={styles.emptyTitle}>No workouts yet</Text>
+              <Image
+                source={WORKOUT_ICONS.WORKOUT}
+                style={{
+                  width: 48,
+                  height: 48,
+                  resizeMode: "contain",
+                  tintColor: "#888888",
+                }}
+              />
+              <Text style={styles.emptyTitle}>
+                {i18n.t("workouts.noWorkouts")}
+              </Text>
               <Text style={styles.emptyText}>
-                Create your first workout to get started
+                {i18n.t("workouts.noWorkoutsSubtitle")}
               </Text>
             </View>
           </Card>
@@ -219,26 +245,57 @@ export default function WorkoutsScreen() {
                             { backgroundColor: `${color}20` },
                           ]}
                         >
-                          <Ionicons
-                            name="barbell-outline"
-                            size={22}
-                            color={color}
-                          />
+                          {(() => {
+                            const muscleGroups = workout.workoutExercises?.map(
+                              (we: any) => we.exercise?.muscleGroup,
+                            ).filter(Boolean);
+                            let primaryMuscleGroup = "EXERCISES";
+                            if (
+                              muscleGroups &&
+                              muscleGroups.length > 0
+                            ) {
+                              const grouped = muscleGroups.reduce(
+                                (acc: Record<string, number>, mg: string) => {
+                                  acc[mg] = (acc[mg] ?? 0) + 1;
+                                  return acc;
+                                },
+                                {},
+                              );
+                              primaryMuscleGroup = Object.keys(grouped).sort(
+                                (a, b) => grouped[b] - grouped[a],
+                              )[0];
+                            }
+                            const iconSource = MUSCLE_GROUP_ICONS[
+                              primaryMuscleGroup
+                            ] ?? WORKOUT_ICONS.WORKOUT;
+                            return (
+                              <Image
+                                source={iconSource}
+                                style={{
+                                  width: 28,
+                                  height: 28,
+                                  resizeMode: "contain",
+                                  tintColor: color,
+                                }}
+                              />
+                            );
+                          })()}
                         </View>
                         <View style={styles.workoutInfo}>
                           <Text style={styles.workoutName}>{workout.name}</Text>
                           <Text style={styles.workoutMeta}>
-                            {workout.workoutExercises?.length ?? 0} exercises
+                            {workout.workoutExercises?.length ?? 0}{" "}
+                            {i18n.t("workouts.exercises")}
                             {" · "}
                             {workout.scheduledAt
                               ? new Date(
                                   workout.scheduledAt,
-                                ).toLocaleDateString("en-US", {
+                                ).toLocaleDateString(i18n.locale, {
                                   month: "short",
                                   day: "numeric",
                                 })
                               : new Date(workout.createdAt).toLocaleDateString(
-                                  "en-US",
+                                  i18n.locale,
                                   {
                                     month: "short",
                                     day: "numeric",
@@ -280,7 +337,9 @@ export default function WorkoutsScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>New Workout</Text>
+              <Text style={styles.modalTitle}>
+                {i18n.t("workouts.newWorkout")}
+              </Text>
               <TouchableOpacity
                 onPress={() => setModalVisible(false)}
                 activeOpacity={0.7}
@@ -290,15 +349,15 @@ export default function WorkoutsScreen() {
             </View>
 
             <Input
-              label="Workout Name"
-              placeholder="e.g. Push Day, Leg Day..."
+              label={i18n.t("workouts.workoutName")}
+              placeholder={i18n.t("workouts.workoutNamePlaceholder")}
               value={workoutName}
               onChangeText={setWorkoutName}
               autoFocus
             />
 
             <Button
-              title="Create Workout"
+              title={i18n.t("workouts.createWorkout")}
               onPress={handleCreate}
               loading={createMutation.isPending}
             />
@@ -315,18 +374,18 @@ export default function WorkoutsScreen() {
 
       <AlertModal
         visible={!!deleteTarget}
-        title="Delete Workout"
-        message={`Are you sure you want to delete "${deleteTarget?.name}"?`}
+        title={i18n.t("workouts.deleteWorkout")}
+        message={`${i18n.t("workouts.deleteConfirm")} "${deleteTarget?.name}"?`}
         type="error"
         onClose={() => setDeleteTarget(null)}
-        confirmText="Delete"
+        confirmText={i18n.t("common.delete")}
         onConfirm={() => {
           if (deleteTarget) {
             deleteMutation.mutate(deleteTarget.id);
             setDeleteTarget(null);
           }
         }}
-        cancelText="Cancel"
+        cancelText={i18n.t("common.cancel")}
       />
     </View>
   );

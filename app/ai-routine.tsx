@@ -6,12 +6,13 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
-  Alert,
+  Image,
 } from "react-native";
+import i18n from "../lib/i18n";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { aiApi } from "../lib/api/ai";
 import { workoutsApi } from "../lib/api/workouts";
 import { exercisesApi } from "../lib/api/exercises";
@@ -19,7 +20,13 @@ import { Card } from "../components/ui/Card";
 import { Button } from "../components/ui/Button";
 import { Badge } from "../components/ui/Badge";
 import { AlertModal } from "../components/ui/AlertModal";
-import { MUSCLE_GROUP_COLORS, getMuscleGroupColor, getWorkoutColor } from "../lib/constants/muscleGroups";
+import {
+  MUSCLE_GROUP_COLORS,
+} from "../lib/constants/muscleGroups";
+
+const AI_ICONS: Record<string, any> = {
+  UNSTOPPABLE: require("../assets/icons/app_unstoppable.png"),
+};
 
 interface AIExercise {
   name: string;
@@ -75,9 +82,8 @@ export default function AiRoutineScreen() {
       }
     } catch {
       setAlertConfig({
-        title: "Error",
-        message:
-          "Could not generate routine. Make sure you have a fitness profile set up.",
+        title: i18n.t("common.error"),
+        message: i18n.t("ai.errorGenerate"),
         type: "error",
       });
       setAlertVisible(true);
@@ -129,16 +135,24 @@ export default function AiRoutineScreen() {
 
       queryClient.invalidateQueries({ queryKey: ["workouts"] });
 
+      const message = i18n.t("ai.workoutsCreatedMsg", {
+        count: created,
+      });
+
+      const skippedMessage =
+        skipped > 0
+          ? ` ${i18n.t("ai.workoutsSkippedMsg", { count: skipped })}`
+          : "";
+
       setAlertConfig({
-        title: "Workouts Created",
-        message: `${created} workout${created !== 1 ? "s" : ""} created successfully.${skipped > 0 ? ` ${skipped} day${skipped !== 1 ? "s" : ""} skipped (no matching exercises found).` : ""}`,
+        title: i18n.t("ai.workoutsCreated"),
+        message: message + skippedMessage,
         type: "success",
       });
-      setAlertVisible(true);
     } catch {
       setAlertConfig({
-        title: "Error",
-        message: "Could not create workouts. Please try again.",
+        title: i18n.t("common.error"),
+        message: i18n.t("ai.errorCreate"),
         type: "error",
       });
       setAlertVisible(true);
@@ -153,7 +167,7 @@ export default function AiRoutineScreen() {
         <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
           <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={styles.title}>AI Routine</Text>
+        <Text style={styles.title}>{i18n.t("ai.title")}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -161,25 +175,32 @@ export default function AiRoutineScreen() {
         {!routine && !rawRoutine && !isLoading && (
           <Card style={styles.introCard}>
             <View style={styles.introIconContainer}>
-              <Ionicons name="flash" size={40} color="#00FF87" />
+              <Image
+                source={AI_ICONS.UNSTOPPABLE}
+                style={[
+                  styles.introIcon,
+                  {
+                    width: 40,
+                    height: 40,
+                  },
+                ]}
+                resizeMode="contain"
+              />
             </View>
-            <Text style={styles.introTitle}>Generate Your Routine</Text>
+            <Text style={styles.introTitle}>{i18n.t("ai.generate")}</Text>
             <Text style={styles.introText}>
-              Our AI will create a personalized 5-day workout plan based on your
-              fitness profile, goals and level.
+              {i18n.t("ai.generateSubtitle")}
             </Text>
-            <Text style={styles.introNote}>
-              Make sure your profile is up to date for the best results.
-            </Text>
+            <Text style={styles.introNote}>{i18n.t("ai.generateNote")}</Text>
           </Card>
         )}
 
         {isLoading && (
           <Card style={styles.loadingCard}>
             <ActivityIndicator color="#00FF87" size="large" />
-            <Text style={styles.loadingTitle}>Generating your routine...</Text>
+            <Text style={styles.loadingTitle}>{i18n.t("ai.generating")}</Text>
             <Text style={styles.loadingText}>
-              This may take a few seconds. Our AI is analyzing your profile.
+              {i18n.t("ai.generatingSubtitle")}
             </Text>
           </Card>
         )}
@@ -190,7 +211,7 @@ export default function AiRoutineScreen() {
               <View style={styles.summaryHeader}>
                 <Ionicons name="checkmark-circle" size={24} color="#00FF87" />
                 <Text style={styles.summaryTitle}>
-                  Your Personalized Routine
+                  {i18n.t("ai.yourRoutine")}
                 </Text>
               </View>
               <Text style={styles.summaryText}>{routine.summary}</Text>
@@ -214,13 +235,13 @@ export default function AiRoutineScreen() {
                       ]}
                     >
                       <Text style={[styles.dayNumber, { color }]}>
-                        Day {index + 1}
+                        {i18n.t("ai.day")} {index + 1}
                       </Text>
                     </View>
                     <View style={styles.dayTitleContainer}>
                       <Text style={styles.dayName}>{day.name}</Text>
                       <Text style={styles.dayDuration}>
-                        ~{day.estimatedDuration} min
+                        ~{day.estimatedDuration} {i18n.t("ai.min")}
                       </Text>
                     </View>
                   </View>
@@ -256,7 +277,11 @@ export default function AiRoutineScreen() {
             })}
 
             <Button
-              title={creatingWorkouts ? "Creating..." : "Save as Workouts"}
+              title={
+                creatingWorkouts
+                  ? i18n.t("ai.creating")
+                  : i18n.t("ai.saveAsWorkouts")
+              }
               onPress={createWorkouts}
               loading={creatingWorkouts}
               variant="primary"
@@ -266,7 +291,7 @@ export default function AiRoutineScreen() {
 
         {rawRoutine && !isLoading && (
           <Card style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Your Routine</Text>
+            <Text style={styles.summaryTitle}>{i18n.t("ai.yourRoutine")}</Text>
             <Text style={styles.summaryText}>{rawRoutine}</Text>
           </Card>
         )}
@@ -274,7 +299,9 @@ export default function AiRoutineScreen() {
         <View style={styles.buttonContainer}>
           <Button
             title={
-              routine || rawRoutine ? "Regenerate Routine" : "Generate Routine"
+              routine || rawRoutine
+                ? i18n.t("ai.regenerate")
+                : i18n.t("ai.generateBtn")
             }
             onPress={generateRoutine}
             loading={isLoading}
@@ -334,6 +361,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: "center",
     marginTop: 8,
+  },
+  introIcon: {
+    width: 40,
+    height: 40,
   },
   loadingCard: { alignItems: "center", paddingVertical: 40, gap: 16 },
   loadingTitle: { color: "#FFFFFF", fontSize: 18, fontWeight: "600" },

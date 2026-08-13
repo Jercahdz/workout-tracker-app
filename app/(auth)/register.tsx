@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Alert, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
+import i18n from "../../lib/i18n";
 import { useRouter } from "expo-router";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
@@ -12,14 +13,12 @@ import { AlertModal } from "../../components/ui/AlertModal";
 
 const registerSchema = z
   .object({
-    email: z.string().email("Invalid email"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z
-      .string()
-      .min(8, "Password must be at least 8 characters"),
+    email: z.string().email(i18n.t("auth.invalidEmail")),
+    password: z.string().min(8, i18n.t("auth.passwordMinLength")),
+    confirmPassword: z.string().min(8, i18n.t("auth.passwordMinLength")),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
+    message: i18n.t("auth.passwordMismatch"),
     path: ["confirmPassword"],
   });
 
@@ -37,6 +36,11 @@ export default function RegisterScreen() {
     formState: { errors, isSubmitting },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 
   const onSubmit = async (data: RegisterForm) => {
@@ -46,7 +50,7 @@ export default function RegisterScreen() {
       const user = await authApi.getMe();
       setUser(user);
     } catch {
-      setAlertMessage("Could not create account. Email may already be in use.");
+      setAlertMessage(i18n.t("auth.registerError"));
       setAlertVisible(true);
     }
   };
@@ -58,10 +62,8 @@ export default function RegisterScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Get started</Text>
-        <Text style={styles.subtitle}>
-          Create your account and start training
-        </Text>
+        <Text style={styles.title}>{i18n.t("auth.getStarted")}</Text>
+        <Text style={styles.subtitle}>{i18n.t("auth.registerSubtitle")}</Text>
       </View>
 
       <Controller
@@ -69,8 +71,8 @@ export default function RegisterScreen() {
         name="email"
         render={({ field: { onChange, value } }) => (
           <Input
-            label="Email"
-            placeholder="you@example.com"
+            label={i18n.t("auth.email")}
+            placeholder={i18n.t("auth.emailPlaceholder")}
             keyboardType="email-address"
             autoCapitalize="none"
             onChangeText={onChange}
@@ -85,7 +87,7 @@ export default function RegisterScreen() {
         name="password"
         render={({ field: { onChange, value } }) => (
           <Input
-            label="Password"
+            label={i18n.t("auth.password")}
             placeholder="••••••••"
             isPassword
             onChangeText={onChange}
@@ -100,7 +102,7 @@ export default function RegisterScreen() {
         name="confirmPassword"
         render={({ field: { onChange, value } }) => (
           <Input
-            label="Confirm Password"
+            label={i18n.t("auth.confirmPassword")}
             placeholder="••••••••"
             isPassword
             onChangeText={onChange}
@@ -111,27 +113,27 @@ export default function RegisterScreen() {
       />
 
       <Button
-        title="Create Account"
+        title={i18n.t("auth.register")}
         onPress={handleSubmit(onSubmit)}
         loading={isSubmitting}
       />
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Already have an account? </Text>
+        <Text style={styles.footerText}>{i18n.t("auth.hasAccount")} </Text>
         <Text
           style={styles.footerLink}
           onPress={() => router.push("/(auth)/login")}
         >
-          Log in
+          {i18n.t("auth.logIn")}
         </Text>
       </View>
       <AlertModal
         visible={alertVisible}
-        title="Registration Failed"
+        title={i18n.t("auth.registrationFailed")}
         message={alertMessage}
         type="error"
         onClose={() => setAlertVisible(false)}
-        cancelText="Try Again"
+        cancelText={i18n.t("auth.tryAgain")}
       />
     </ScrollView>
   );
