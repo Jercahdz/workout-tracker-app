@@ -217,6 +217,7 @@ export default {
     },
     profile: {
         title: "Perfil",
+        language: "Idioma",
         fitnessProfile: "Perfil físico",
         editProfile: "Editar perfil",
         createProfile: "Crear perfil",
@@ -294,5 +295,7 @@ export default {
             "No se pudo generar la rutina. Asegúrate de tener un perfil de condición física configurado.",
         day: "Día",
         min: "min",
+        saveSuccess: "Entrenamientos guardados",
+        saveSuccessMsg: "Los entrenamientos se han guardado correctamente.",
     },
 };

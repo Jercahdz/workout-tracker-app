@@ -217,6 +217,7 @@ export default {
     },
     profile: {
         title: "Profile",
+        language: "Language",
         fitnessProfile: "Fitness Profile",
         editProfile: "Edit Profile",
         createProfile: "Create Profile",
@@ -294,5 +295,7 @@ export default {
             "Could not generate routine. Make sure you have a fitness profile set up.",
         day: "Day",
         min: "min",
+        saveSuccess: "Workouts saved",
+        saveSuccessMsg: "The workouts have been saved successfully.",
     },
 };

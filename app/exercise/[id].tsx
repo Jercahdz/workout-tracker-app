@@ -29,24 +29,68 @@ const MUSCLE_GROUP_ICONS: Record<string, any> = {
 
 const EXERCISEDB_NAME_MAP: Record<string, string> = {
   "Bench Press": "barbell bench press",
-  "Incline Dumbbell Press": "incline dumbbell press",
-  "Pull Up": "pull-up",
-  "Barbell Row": "barbell bent over row",
-  "Lat Pulldown": "cable lat pulldown",
-  Deadlift: "deadlift",
-  Squat: "barbell squat",
-  "Overhead Press": "barbell overhead press",
-  "Romanian Deadlift": "romanian deadlift",
-  "Leg Press": "leg press",
-  "Dumbbell Curl": "dumbbell curl",
-  "Tricep Pushdown": "cable triceps pushdown",
-  Plank: "plank",
-  Dips: "dips",
-  Lunges: "lunges",
-  "Hip Thrust": "barbell hip thrust",
-  "Skull Crusher": "ez barbell skull crusher",
-  "Hammer Curl": "hammer curls",
-  "Lateral Raise": "lateral raises",
+  "Dumbbell Pullover": "dumbbell pullover",
+  "Decline Bench Press": "barbell decline bench press",
+  "Dumbbell Bench Press": "dumbbell bench press",
+  "Svend Press": "weighted svend press",
+  Deadlift: "barbell deadlift",
+  "T-Bar Row": "lever reverse t-bar row",
+  "Good Morning": "barbell good morning",
+  "Rack Pull": "barbell rack pull",
+  "Straight Arm Pulldown": "cable straight arm pulldown",
+  "Inverted Row": "inverted row",
+  "Overhead Press": "barbell seated overhead press",
+  "Lateral Raise": "cable lateral raise",
+  "Front Raise": "barbell front raise",
+  "Upright Row": "barbell upright row",
+  "Cable Lateral Raise": "cable lateral raise",
+  "Barbell Curl": "barbell curl",
+  "Hammer Curl": "dumbbell hammer curl",
+  "Preacher Curl": "barbell preacher curl",
+  "Cable Curl": "cable curl",
+  "Concentration Curl": "dumbbell concentration curl",
+  "Overhead Tricep Extension": "cable high pulley overhead tricep extension",
+  "Reverse Curl": "barbell reverse curl",
+  "Spider Curl": "ez barbell spider curl",
+  "Romanian Deadlift": "barbell romanian deadlift",
+  "Leg Extension": "lever leg extension",
+  "Leg Curl": "seated leg curl",
+  "Hack Squat": "barbell hack squat",
+  "Sumo Deadlift": "barbell sumo deadlift",
+  "Glute Bridge": "barbell glute bridge",
+  "Goblet Squat": "kettlebell goblet squat",
+  "Seated Calf Raise": "barbell seated calf raise",
+  "Hanging Leg Raise": "hanging leg raise",
+  "Russian Twist": "russian twist",
+  "Bicycle Crunch": "band bicycle crunch",
+  "Mountain Climber": "mountain climber",
+  "Pallof Press": "band horizontal pallof press",
+  "Dead Bug": "dead bug",
+  Burpee: "burpee",
+  "Kettlebell Swing": "kettlebell swing",
+  "Clean and Press": "barbell clean and press",
+  Thruster: "kettlebell thruster",
+  "Turkish Get Up": "kettlebell turkish get up (squat style)",
+  "Jump Squat": "jump squat",
+  "Bear Crawl": "bear crawl",
+  "Rope Climb": "rope climb",
+  "Dumbbell Shoulder Press": "dumbbell seated shoulder press",
+  "Machine Shoulder Press": "lever military press",
+  Squat: "barbell full squat",
+  "Lat Pulldown": "cable lat pulldown full range of motion",
+  "Incline Dumbbell Press": "dumbbell incline bench press",
+  "Incline Cable Fly": "cable incline fly",
+  "Seated Cable Row": "cable seated row",
+  "Ab Wheel Rollout": "wheel rollout",
+  "Chest Supported Row": "cable incline bench row",
+  "Rear Delt Fly": "dumbbell reverse fly",
+  "Bent Over Lateral Raise": "dumbbell rear lateral raise",
+  "EZ Bar Curl": "ez barbell curl",
+  Lunges: "dumbbell lunge",
+  "Bulgarian Split Squat": "dumbbell single leg split squat",
+  "Leg Press Calf Raise": "sled calf press on leg press",
+  "Landmine Rotation": "landmine 180",
+  "Farmer Walk": "farmers walk",
 };
 
 interface ExerciseDBData {
@@ -55,63 +99,6 @@ interface ExerciseDBData {
   secondaryMuscles: string[];
   difficulty?: string;
 }
-
-const DIFFICULTY_LABELS: Record<string, string> = {
-  beginner: i18n.t("exerciseDetail.difficulty.beginner"),
-  intermediate: i18n.t("exerciseDetail.difficulty.intermediate"),
-  advanced: i18n.t("exerciseDetail.difficulty.advanced"),
-};
-
-const MUSCLE_GROUP_TRANSLATIONS: Record<string, string> = {
-  CHEST: i18n.t("exercises.chest"),
-  BACK: i18n.t("exercises.back"),
-  SHOULDERS: i18n.t("exercises.shoulders"),
-  ARMS: i18n.t("exercises.arms"),
-  LEGS: i18n.t("exercises.legs"),
-  CORE: i18n.t("exercises.core"),
-  FULL_BODY: i18n.t("exercises.fullBody"),
-};
-
-const MUSCLE_TRANSLATIONS: Record<string, string> = {
-  delts: i18n.t("exerciseDetail.muscles.delts"),
-  triceps: i18n.t("exerciseDetail.muscles.triceps"),
-  "upper chest": i18n.t("exerciseDetail.muscles.upper chest"),
-  pectorals: i18n.t("exerciseDetail.muscles.pectorals"),
-  biceps: i18n.t("exerciseDetail.muscles.biceps"),
-  lats: i18n.t("exerciseDetail.muscles.lats"),
-  traps: i18n.t("exerciseDetail.muscles.traps"),
-  quads: i18n.t("exerciseDetail.muscles.quads"),
-  hamstrings: i18n.t("exerciseDetail.muscles.hamstrings"),
-  glutes: i18n.t("exerciseDetail.muscles.glutes"),
-  calves: i18n.t("exerciseDetail.muscles.calves"),
-  abs: i18n.t("exerciseDetail.muscles.abs"),
-  obliques: i18n.t("exerciseDetail.muscles.obliques"),
-  forearms: i18n.t("exerciseDetail.muscles.forearms"),
-};
-
-const EQUIPMENT_TRANSLATIONS: Record<string, string> = {
-  Barbell: i18n.t("exercises.equipment.barbell"),
-  Dumbbells: i18n.t("exercises.equipment.dumbbells"),
-  Dumbbell: i18n.t("exercises.equipment.dumbbell"),
-  "Cable Machine": i18n.t("exercises.equipment.cableMachine"),
-  "Pull-up Bar": i18n.t("exercises.equipment.pullUpBar"),
-  Machine: i18n.t("exercises.equipment.machine"),
-  Plates: i18n.t("exercises.equipment.plates"),
-  "Parallel Bars": i18n.t("exercises.equipment.parallelBars"),
-  "Leg Press Machine": i18n.t("exercises.equipment.legPressMachine"),
-  Kettlebell: i18n.t("exercises.equipment.kettlebell"),
-  "Ab Wheel": i18n.t("exercises.equipment.abWheel"),
-  Box: i18n.t("exercises.equipment.box"),
-  "Battle Ropes": i18n.t("exercises.equipment.battleRopes"),
-  "Medicine Ball": i18n.t("exercises.equipment.medicineBall"),
-  Sled: i18n.t("exercises.equipment.sled"),
-  Rope: i18n.t("exercises.equipment.rope"),
-  Prowler: i18n.t("exercises.equipment.prowler"),
-  Sandbag: i18n.t("exercises.equipment.sandbag"),
-  Bodyweight: i18n.t("exercises.equipment.bodyweight"),
-  "T-Bar": i18n.t("exercises.equipment.tBar"),
-  "EZ Bar": i18n.t("exercises.equipment.ezBar"),
-};
 
 export default function ExerciseDetailScreen() {
   const { id, name, muscleGroup, equipment, description } =
@@ -122,6 +109,64 @@ export default function ExerciseDetailScreen() {
       equipment: string;
       description: string;
     }>();
+
+  const DIFFICULTY_LABELS: Record<string, string> = {
+    beginner: i18n.t("exerciseDetail.difficulty.beginner"),
+    intermediate: i18n.t("exerciseDetail.difficulty.intermediate"),
+    advanced: i18n.t("exerciseDetail.difficulty.advanced"),
+  };
+
+  const MUSCLE_GROUP_TRANSLATIONS: Record<string, string> = {
+    CHEST: i18n.t("exercises.chest"),
+    BACK: i18n.t("exercises.back"),
+    SHOULDERS: i18n.t("exercises.shoulders"),
+    ARMS: i18n.t("exercises.arms"),
+    LEGS: i18n.t("exercises.legs"),
+    CORE: i18n.t("exercises.core"),
+    FULL_BODY: i18n.t("exercises.fullBody"),
+  };
+
+  const MUSCLE_TRANSLATIONS: Record<string, string> = {
+    delts: i18n.t("exerciseDetail.muscles.delts"),
+    triceps: i18n.t("exerciseDetail.muscles.triceps"),
+    "upper chest": i18n.t("exerciseDetail.muscles.upper chest"),
+    pectorals: i18n.t("exerciseDetail.muscles.pectorals"),
+    biceps: i18n.t("exerciseDetail.muscles.biceps"),
+    lats: i18n.t("exerciseDetail.muscles.lats"),
+    traps: i18n.t("exerciseDetail.muscles.traps"),
+    quads: i18n.t("exerciseDetail.muscles.quads"),
+    hamstrings: i18n.t("exerciseDetail.muscles.hamstrings"),
+    glutes: i18n.t("exerciseDetail.muscles.glutes"),
+    calves: i18n.t("exerciseDetail.muscles.calves"),
+    abs: i18n.t("exerciseDetail.muscles.abs"),
+    obliques: i18n.t("exerciseDetail.muscles.obliques"),
+    forearms: i18n.t("exerciseDetail.muscles.forearms"),
+  };
+
+  const EQUIPMENT_TRANSLATIONS: Record<string, string> = {
+    Barbell: i18n.t("exercises.equipment.barbell"),
+    Dumbbells: i18n.t("exercises.equipment.dumbbells"),
+    Dumbbell: i18n.t("exercises.equipment.dumbbell"),
+    "Cable Machine": i18n.t("exercises.equipment.cableMachine"),
+    "Pull-up Bar": i18n.t("exercises.equipment.pullUpBar"),
+    Machine: i18n.t("exercises.equipment.machine"),
+    Plates: i18n.t("exercises.equipment.plates"),
+    "Parallel Bars": i18n.t("exercises.equipment.parallelBars"),
+    "Leg Press Machine": i18n.t("exercises.equipment.legPressMachine"),
+    Kettlebell: i18n.t("exercises.equipment.kettlebell"),
+    "Ab Wheel": i18n.t("exercises.equipment.abWheel"),
+    Box: i18n.t("exercises.equipment.box"),
+    "Battle Ropes": i18n.t("exercises.equipment.battleRopes"),
+    "Medicine Ball": i18n.t("exercises.equipment.medicineBall"),
+    Sled: i18n.t("exercises.equipment.sled"),
+    Rope: i18n.t("exercises.equipment.rope"),
+    Prowler: i18n.t("exercises.equipment.prowler"),
+    Sandbag: i18n.t("exercises.equipment.sandbag"),
+    Bodyweight: i18n.t("exercises.equipment.bodyweight"),
+    "T-Bar": i18n.t("exercises.equipment.tBar"),
+    "EZ Bar": i18n.t("exercises.equipment.ezBar"),
+  };
+
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [exerciseDbId, setExerciseDbId] = useState<string | null>(null);
@@ -285,7 +330,7 @@ export default function ExerciseDetailScreen() {
 
         {dataLoading ? (
           <Card style={styles.card}>
-            <ActivityIndicator color= "color" size="small" />
+            <ActivityIndicator color="color" size="small" />
             <Text style={styles.loadingText}>
               {i18n.t("exerciseDetail.loadingInstructions")}
             </Text>

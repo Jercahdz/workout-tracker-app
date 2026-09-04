@@ -3,6 +3,7 @@ import { Stack, useRouter, useSegments } from "expo-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { StatusBar } from "expo-status-bar";
 import { useAuthStore } from "../store/authStore";
+import { useLanguageStore } from "../store/languageStore";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { authApi } from "../lib/api/auth";
 import * as SecureStore from "expo-secure-store";
@@ -11,12 +12,14 @@ const queryClient = new QueryClient();
 
 function RootLayoutNav() {
   const { isAuthenticated, loadAuth, setUser, logout } = useAuthStore();
+  const { loadLocale } = useLanguageStore();
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const segments = useSegments();
 
   useEffect(() => {
     const init = async () => {
+      await loadLocale();
       await loadAuth();
       const token = await SecureStore.getItemAsync("accessToken");
       if (token) {

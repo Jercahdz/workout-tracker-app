@@ -10,6 +10,8 @@ import {
   Image,
 } from "react-native";
 import i18n from "../../lib/i18n";
+import { useLanguageStore } from "../../store/languageStore";
+import { LanguageModal } from "../../components/ui/LanguageModal";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -35,10 +37,10 @@ const ACHIEVEMENT_ICONS: Record<string, any> = {
   "Consistency King": require("../../assets/icons/app_consistency_king.png"),
   "AI Powered": require("../../assets/icons/app_ai_powered.png"),
   "First Rep": require("../../assets/icons/app_first_rep.png"),
-  "Century": require("../../assets/icons/app_century.png"),
+  Century: require("../../assets/icons/app_century.png"),
   "Iron Will": require("../../assets/icons/app_iron_will.png"),
   "On Fire": require("../../assets/icons/app_on_fire.png"),
-  "Unstoppable": require("../../assets/icons/app_unstoppable.png"),
+  Unstoppable: require("../../assets/icons/app_unstoppable.png"),
 };
 
 const TRAINING_DAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
@@ -54,6 +56,13 @@ export default function ProfileScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [alertVisible, setAlertVisible] = useState(false);
   const [logoutAlertVisible, setLogoutAlertVisible] = useState(false);
+  const { locale, setLocale } = useLanguageStore();
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+
+  const handleLanguageSelect = async (selectedLocale: "en" | "es") => {
+    await setLocale(selectedLocale);
+    setLanguageModalVisible(false);
+  };
   const [alertConfig, setAlertConfig] = useState({
     title: "",
     message: "",
@@ -212,14 +221,20 @@ export default function ProfileScreen() {
           </View>
           <View style={styles.userInfo}>
             <Text style={styles.email}>{user?.email}</Text>
-            <Badge label={user?.role ?? "USER"} variant="primary" />
           </View>
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={() => setLanguageModalVisible(true)}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="language-outline" size={24} color="#888888" />
+          </TouchableOpacity>
           <TouchableOpacity
             style={styles.logoutButton}
             onPress={() => setLogoutAlertVisible(true)}
             activeOpacity={0.7}
           >
-            <Ionicons name="log-out-outline" size={28} color="#888888" />
+            <Ionicons name="log-out-outline" size={24} color="#888888" />
           </TouchableOpacity>
         </View>
 
@@ -227,7 +242,7 @@ export default function ProfileScreen() {
           <Card style={styles.statCard}>
             <Image
               source={PROFILE_ICONS.STREAK}
-              style={{ width: 32, height: 32, }}
+              style={{ width: 32, height: 32 }}
               resizeMode="contain"
             />
             <Text style={styles.statValue}>
@@ -241,7 +256,7 @@ export default function ProfileScreen() {
           <Card style={styles.statCard}>
             <Image
               source={PROFILE_ICONS.SHIELD}
-              style={{ width: 32, height: 32}}
+              style={{ width: 32, height: 32 }}
               resizeMode="contain"
             />
             <Text style={styles.statValue}>
@@ -637,6 +652,13 @@ export default function ProfileScreen() {
         onConfirm={logout}
         cancelText={i18n.t("common.cancel")}
       />
+
+      <LanguageModal
+        visible={languageModalVisible}
+        currentLocale={locale}
+        onSelect={handleLanguageSelect}
+        onClose={() => setLanguageModalVisible(false)}
+      />
     </View>
   );
 }
@@ -668,7 +690,7 @@ const styles = StyleSheet.create({
   },
   userInfo: { flex: 1, gap: 6 },
   email: { color: "#FFFFFF", fontSize: 16, fontWeight: "600" },
-  logoutButton: { padding: 8 },
+  logoutButton: { padding: 4 },
   statsRow: { flexDirection: "row", gap: 12, marginBottom: 24 },
   statCard: { flex: 1, alignItems: "center", gap: 4, paddingVertical: 16 },
   statValue: { color: "#FFFFFF", fontSize: 22, fontWeight: "bold" },

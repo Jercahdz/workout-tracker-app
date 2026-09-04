@@ -149,6 +149,7 @@ export default function AiRoutineScreen() {
         message: message + skippedMessage,
         type: "success",
       });
+      setAlertVisible(true);
     } catch {
       setAlertConfig({
         title: i18n.t("common.error"),

@@ -55,41 +55,52 @@ const FILTER_LABELS: Record<string, string> = {
   FULL_BODY: i18n.t("exercises.fullBody"),
 };
 
-const MUSCLE_GROUP_TRANSLATIONS: Record<string, string> = {
-  CHEST: i18n.t("exercises.chest"),
-  BACK: i18n.t("exercises.back"),
-  SHOULDERS: i18n.t("exercises.shoulders"),
-  ARMS: i18n.t("exercises.arms"),
-  LEGS: i18n.t("exercises.legs"),
-  CORE: i18n.t("exercises.core"),
-  FULL_BODY: i18n.t("exercises.fullBody"),
-};
-
-const EQUIPMENT_TRANSLATIONS: Record<string, string> = {
-  Barbell: i18n.t("exercises.equipment.barbell"),
-  Dumbbells: i18n.t("exercises.equipment.dumbbells"),
-  Dumbbell: i18n.t("exercises.equipment.dumbbell"),
-  "Cable Machine": i18n.t("exercises.equipment.cableMachine"),
-  "Pull-up Bar": i18n.t("exercises.equipment.pullUpBar"),
-  Machine: i18n.t("exercises.equipment.machine"),
-  Plates: i18n.t("exercises.equipment.plates"),
-  "Parallel Bars": i18n.t("exercises.equipment.parallelBars"),
-  "Leg Press Machine": i18n.t("exercises.equipment.legPressMachine"),
-  Kettlebell: i18n.t("exercises.equipment.kettlebell"),
-  "Ab Wheel": i18n.t("exercises.equipment.abWheel"),
-  Box: i18n.t("exercises.equipment.box"),
-  "Battle Ropes": i18n.t("exercises.equipment.battleRopes"),
-  "Medicine Ball": i18n.t("exercises.equipment.medicineBall"),
-  Sled: i18n.t("exercises.equipment.sled"),
-  Rope: i18n.t("exercises.equipment.rope"),
-  Prowler: i18n.t("exercises.equipment.prowler"),
-  Sandbag: i18n.t("exercises.equipment.sandbag"),
-  Bodyweight: i18n.t("exercises.equipment.bodyweight"),
-  "T-Bar": i18n.t("exercises.equipment.tBar"),
-  "EZ Bar": i18n.t("exercises.equipment.ezBar"),
-};
-
 export default function ExercisesScreen() {
+  const MUSCLE_GROUP_TRANSLATIONS: Record<string, string> = {
+    CHEST: i18n.t("exercises.chest"),
+    BACK: i18n.t("exercises.back"),
+    SHOULDERS: i18n.t("exercises.shoulders"),
+    ARMS: i18n.t("exercises.arms"),
+    LEGS: i18n.t("exercises.legs"),
+    CORE: i18n.t("exercises.core"),
+    FULL_BODY: i18n.t("exercises.fullBody"),
+  };
+
+  const EQUIPMENT_TRANSLATIONS: Record<string, string> = {
+    Barbell: i18n.t("exercises.equipment.barbell"),
+    Dumbbells: i18n.t("exercises.equipment.dumbbells"),
+    Dumbbell: i18n.t("exercises.equipment.dumbbell"),
+    "Cable Machine": i18n.t("exercises.equipment.cableMachine"),
+    "Pull-up Bar": i18n.t("exercises.equipment.pullUpBar"),
+    Machine: i18n.t("exercises.equipment.machine"),
+    Plates: i18n.t("exercises.equipment.plates"),
+    "Parallel Bars": i18n.t("exercises.equipment.parallelBars"),
+    "Leg Press Machine": i18n.t("exercises.equipment.legPressMachine"),
+    Kettlebell: i18n.t("exercises.equipment.kettlebell"),
+    "Ab Wheel": i18n.t("exercises.equipment.abWheel"),
+    Box: i18n.t("exercises.equipment.box"),
+    "Battle Ropes": i18n.t("exercises.equipment.battleRopes"),
+    "Medicine Ball": i18n.t("exercises.equipment.medicineBall"),
+    Sled: i18n.t("exercises.equipment.sled"),
+    Rope: i18n.t("exercises.equipment.rope"),
+    Prowler: i18n.t("exercises.equipment.prowler"),
+    Sandbag: i18n.t("exercises.equipment.sandbag"),
+    Bodyweight: i18n.t("exercises.equipment.bodyweight"),
+    "T-Bar": i18n.t("exercises.equipment.tBar"),
+    "EZ Bar": i18n.t("exercises.equipment.ezBar"),
+  };
+
+  const FILTER_LABELS: Record<string, string> = {
+    ALL: i18n.t("exercises.all"),
+    CHEST: i18n.t("exercises.chest"),
+    BACK: i18n.t("exercises.back"),
+    SHOULDERS: i18n.t("exercises.shoulders"),
+    ARMS: i18n.t("exercises.arms"),
+    LEGS: i18n.t("exercises.legs"),
+    CORE: i18n.t("exercises.core"),
+    FULL_BODY: i18n.t("exercises.fullBody"),
+  };
+
   const insets = useSafeAreaInsets();
   const [selectedFilter, setSelectedFilter] = useState("ALL");
   const router = useRouter();
@@ -246,7 +257,10 @@ export default function ExercisesScreen() {
                       style={[
                         styles.exerciseIconImage,
                         {
-                          tintColor: MUSCLE_GROUP_COLORS[exercise.muscleGroup ?? "#888888"],
+                          tintColor:
+                            MUSCLE_GROUP_COLORS[
+                              exercise.muscleGroup ?? "#888888"
+                            ],
                         },
                       ]}
                       resizeMode="contain"
