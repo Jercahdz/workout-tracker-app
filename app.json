@@ -13,7 +13,6 @@
       "image": "./assets/icons/icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#0F0F0F"
-      
     },
     "ios": {
       "supportsTablet": true
@@ -24,7 +23,8 @@
         "backgroundColor": "#0F0F0F"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.jercahdz.workouttrackerapp"
     },
     "web": {
       "favicon": "./assets/icons/icon.png"
@@ -34,6 +34,12 @@
       "expo-secure-store",
       "expo-font",
       "expo-localization"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "7f5901ae-993b-4892-b448-ea8a67d8b0b0"
+      }
+    }
   }
 }
