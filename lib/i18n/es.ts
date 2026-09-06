@@ -15,7 +15,7 @@ export default {
     },
     tabs: {
         home: "Inicio",
-        workouts: "Entrenos",
+        workouts: "Rutinas",
         exercises: "Ejercicios",
         progress: "Progreso",
         profile: "Perfil",
@@ -281,11 +281,11 @@ export default {
         generatingSubtitle:
             "Esto puede tardar unos segundos. Nuestra IA está analizando tu perfil.",
         yourRoutine: "Tu rutina personalizada",
-        saveAsWorkouts: "Guardar como entrenamientos",
+        saveAsWorkouts: "Guardar como rutina",
         regenerate: "Regenerar rutina",
         generateBtn: "Generar rutina",
         workoutsCreated: "Entrenamientos creados",
-        workoutsCreatedMsg: "{{count}} entrenamientos creados correctamente.",
+        workoutsCreatedMsg: "{{count}} rutinas creadas correctamente.",
         workoutsSkippedMsg:
             "{{count}} días omitidos (no se encontraron ejercicios coincidentes).",
         errorCreate:
