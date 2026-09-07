@@ -11,7 +11,7 @@
     "scheme": "workouttracker",
     "splash": {
       "image": "./assets/icons/icon.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#0F0F0F"
     },
     "ios": {
